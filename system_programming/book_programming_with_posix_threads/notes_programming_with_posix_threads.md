@@ -113,5 +113,5 @@ Regarding the actual types provided by Pthreads (pthread_t, pthread_mutex_t etc)
 Pthreads deviate form the standard UNIX and C convention that 0 represents success and failure is indicated by -1 and setting the global variable errno to a code specifying the type of error. Original POSIX standard have *errno* as an *extern int*, which supports a single execution context. Pthreads do not set *errno* and do not reserve -1 return value for error. They return 0 on success and include an extra output parameter for storing results. An error code from *errno.h* is returned instead of 0 on error. Pthreads also provides a per-thread *errno* for supporting other code that uses it. This means that *errno* can still be used as normal inside any thread because each thread has its copy.  
 Source code: ```001_05_thread_error.c```
 
-
+The one exception to the error rules above is *pthread_get_specific*, which does not report errors at all, since it has to be as fast as possible.
 
