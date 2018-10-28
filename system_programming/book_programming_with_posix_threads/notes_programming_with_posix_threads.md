@@ -31,7 +31,8 @@ A nice analogy between the threading model and the duties of three programmers o
 *Thread-safe* means that the code can be called safely from multiple threads. The best way is to protect the data, not the code, if possible. In that way, multiple threads can execute the same function in parallel, when the threads don't use the same data at the same time. I.e.: a function that writes to a stream can be made safe by serializing the entire function, or can be made safe and efficient if each stream has an associated mutex.
 
 *Reentrant* is sometimes used to mean "efficiently thread-safe". The idea is for a function to have defined results even if it is executed (*entered*) before an earlier execution has finished. This can usually be accomplished by making the caller provide the context which is used for saving state, like ```readdir_r, localtime_r, strtok_r ...```.  
-Note that a function can be reentrant but not thread-safe, but it is not common. See [this link](https://deadbeef.me/2017/09/reentrant-threadsafe) for an example. (```001_01_threadsafe_reentrant.c```)
+Note that a function can be reentrant but not thread-safe, but it is not common. See [this link](https://deadbeef.me/2017/09/reentrant-threadsafe) for an example.  
+Source code: (```001_01_threadsafe_reentrant.c```)
 
 **Concurrency control functions**
 
@@ -41,9 +42,55 @@ Any concurrent system mut provide a core set of functions:
  - *scheduling* - which context executes at any set of time and does switching between them
  - *synchronization* - mechanisms for the execution context to coordinate their use of resources ("cooperation")
 
-### Asynchronous programming is intuitive ###
+### Asynchronous programming is intuitive
 
 Threads have their own program counter, their own stack pointer, general registers. It does not have its own file descriptors or address space. Threads share files and memory, including text and data segments.:
+
+Asynchronous work is similar to real-life, so programming can be thought of as the same.
+
+### Asynchronous programming by example
+
+A simple "alarm CLI app" - you give it a number of seconds and a message, after that seconds it prints the message. Three variants of implementation: serial/synchronous, multi-process, multi-thread. 
+
+In the forked vesion we use local variable to store data, and those variables will be specific to each process, so the parent can safely modify them after child creation. While in the multi-threaded version, we need to do some more bookkeeping by managing the data for each thread (malloc, free).
+
+In the forked version, cleanup is required for terminated processes. In the threaded one, once pthread_detach was called, Pthreads will handle the cleanup of the terminated threads.
+
+Of course, if hundreds of alarms are created, hundreds of threads are much more lightweight on the system than hundreds of processes.
+
+Source code: ```001_02_alarm_sync.c, 001_03_alarm_fork.c, 001_04_alam_thread.c```
+
+A more sophisticated version could use only two threads: one for input and for expiration of the next alarm. The same could be done with two processes, but with more effort to pass data.
+
+### Benefits of threading
+
+ 1. parallelism on multiprocessor hardware
+ 2. concurrency - perform computations while waiting for other operaitons (like I/O)
+ 3. modular programming model - relationships between "events" in the program
+
+For parallelism, scaling is predicted by *Amdahl's law* which take into account the ratio of "parallelizable code" from "total execution time" - p, and the number of precessors the code can use - n.
+
+```
+               1
+ speedup = -------------
+           (1 - p) + p/n
+```
+
+When the program is totally serial (p = 0), the speedup will be 1, no matter the number of cores, n. If the program requires to synchronization (p = 1), which is utopic, the speedup is the number of cores, n.
+
+Amdahl's law is only helpful to understand scaling. It is not a practical tool because it is nearly impossible to accurately compute *p* for any program (your code, kernel code ,hardware operation).
+
+For concurrency, the biggest advantage performance wise, is making computational progress while the blocking for operations like I/O.
+
+Some systems have *asynchronous I/O*, but aync I/O is more complicated to use than threads, even if the system provides it. For example, the alarm clock could be written with aync reads and timer signals, but the code would be harder to understand and maintain. Async I/O does have an advantage, it is "cheaper" than threads.
+
+Another method o coding an async app is for each action to be treated as an event. Events are queued by some hidden process and then dispatched to applications, usually through callback routines registered with the dispatcher. The events are dispatched sequentially. Simple applications may be easier to write and understand with this model, but complex one may prove challenging. If treating an event takes long, it can be moved to a separate thread, or sprinkled with calls to the event dispatcher.
+
+The threading programming model makes synchronization contructs mandatory in the code, which makes the program more readable and more mainteinable. In serial programs, it is clear that function B goes after function A, so that there is no need to make the dependencies between them explicit in the code. You could do this with some comments, but comments are optional and usually get left behind when changing the code. Using, or at least considering, threading mode and synchronization constructs can make the dependencies clearer.
+
+> An assembly language programmer can write better, more maintainable assembly code by understanding high-level language programming; a C language programmer can write better, more maintainable C code by understanding object-oriented programming. Even if you never write a threaded program, you may benefit from understanding the threaded programming model of independent functions with explicit dependencies. These are “mental models” (or that dreadfully overused word, “paradigms”) that are more or less independent of the specific code sequences you write. Cleanly isolating functionally independent code may even make sequential programs easier to understand and maintain.
+
+### Costs of threading
 
 
 

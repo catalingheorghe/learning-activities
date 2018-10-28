@@ -174,7 +174,7 @@ void my_func(swap_func function)
 	printf("\n");
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	my_func(swap_basic);
 
