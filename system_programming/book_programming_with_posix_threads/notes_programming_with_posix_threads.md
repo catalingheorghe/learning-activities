@@ -4,6 +4,7 @@
 
 0. About
 1. Introduction
+2. Threads
 
 ## 0. About
 
@@ -114,4 +115,93 @@ Pthreads deviate form the standard UNIX and C convention that 0 represents succe
 Source code: ```001_05_thread_error.c```
 
 The one exception to the error rules above is *pthread_get_specific*, which does not report errors at all, since it has to be as fast as possible.
+
+## Threads
+
+### Creating and using threads
+
+A thread is created with ```pthread_create``` and begins by calling a function that you provide. This function has a single argument, of type ```void *``` and returns a value of the same type. The identifier returned in the *thread* argument is of type *pthread_t*. A thread can find out its own identifier using *pthread_self*. There is no way to find out the identifier or another thread, if you don't store it yourself.
+
+To test equality of two thread identifiers, Pthreads provides ```pthread_equal```.
+
+The *main thread* is the one that executes main. It is special because Pthreads retains traditional UNIX process behavior when the function main returns: the process terminates without waiting for other threads to complete.
+
+You should always detach each thread when there is no more need for it. "Undetached" (threads that have terminated but have not been detached) retain virtual memory, including their stacks, as well as other system resources. Detaching lets the system take back those resources. A thread may detach its-self, or can be detached by any other thread, using ```pthread_detach``` function. If you need to know the return value of a thread execution, or when it has finished, use ```pthread_join```. It will block until the thread finishes, then optionally, store the return value. The join automatically *detaches* the thread.
+
+You need to make sure that the process runs until created threads complete. ```pthread_join``` can be used for this, but others way may also be used (waiting for some data for example).
+
+It is a good idea to always return something from the thread function, even if it is NULL; ```pthread_join``` will always put some value in the return argument, if instructed to, so it will take whatever happens to be in the place where the thread's start function would have stored a return value.
+
+Once pthread_join is called, calling it again is not allowed, the *joinee* thread has already been detached.
+
+If more than one thread is interested in the return value of a thread, join cannot be used. Another way must be implemented, like using a condition variable that the terminating thread can signal to let interested threads know that the data is available.
+
+### The life of a thread
+
+There are four basic states in which a thread can be. Systems usually provide "sub-states" or "additional states", but those usually only distinguish between resons for entering the basic states.
+
+ - Ready: able to run but waiting for a processor
+ - Running: currently running (on a multiprocessor, may be more than one)
+ - Blocked: not able to run because it is waiting for something
+ - Terminated: has terminated, not detached and has not yet been joined; after this, it is *recycled*
+
+**Creation**
+
+The initial/main thread of a process is created when a process is started. It holds registers, program counter, stack pointer etc needed to execute code. Additional threads are created by explicit calls to *pthread_create*. Threads may also be created as result of receiving a signal if the signal disposition is set to ```SIGEV_THREAD```.
+
+The state of a new thread is *ready*. It may remain in that state for a period, depending on the scheduler.
+
+*IMPORTANT*  
+There is no synchronization between the creating thread's return from *pthread_create* and the scheduling of the new thread. The thread may start *before* the creating thread returns. It may even run to completion and terminate before *pthread_create* returns.
+
+**Startup**
+
+When it eventually starts executing instructions, it will execute the thread start function with the argument provided.
+
+In the initial thread, the thread start function (```main```) is called from outside your program. The arguments to it are also different: argvc and argv, not a single void* argument. When the initial thread returns from main, the process will be terminated. 
+
+*NOTE*  
+If you want to terminate the initial thread while allowing other threads to continue running, call *pthread_exit* instead of returning from main.
+
+Also, on many systems, the main thread's stack, being the process default stack, will be larger than the stack of other threads.
+
+**Running and blocking**
+
+
+If a thread needs a resource that is not availbale, it becomes *blocked*. If the system gives the processor away to another execution context, it is *preempted* (like in timeslicing), so it is in state *ready*. When a thread is unblocked so that is eligible to run, it is also in *ready* state. 
+
+A thread goes in *running* state when it the scheduler assigns it to a processor. The processor saves the context of the blocking or preempted thread and restores the context of the ready thread, so that it can run.
+
+Example of becoming blocked: lock a mutex that is locked, wait on condition variable, calling sigwat for a signal that is not currently pending, I/O operation that cannot be immediately completed, or other system operations, such as a page fault.
+
+When a thread is unblocked after a wait for an event, it is made *ready*.
+
+**Termination**
+
+Usual termination is by returning from the start function. Threads that call ```pthread_exit``` or that are cancelled using ```pthread_cancel``` also terminate after calling each cleanup handler that the thread registered by calling ```pthread_cleanup_push``` (and that hasn't yet been removed by ```pthread_cleanup_pop```).
+
+If threads have any *thread-specific data* values that are non-NULL, the associated destructor functions for those keys are called, if any.
+
+if the thread was already detached, it moves straight to the next stage: *recycling*. Otherwise it becomes *terminated* and will remain available for another thread to join with i. The recommendation is that if you create threads that you don't intend to joing with, create them detached (thread attribute).
+
+The only external difference between a thread that terminate on its-own and a thread that was cancelled, is that the return value is always ```PTHREAD_CANCELLED``` for the latter.
+
+Once ```pthread_join``` has extracted the return value, the terminated thread is detached by pthread_join, and may be recycled before the call to pthread_join returns. 
+
+*NOTE*  
+The returned value should never be a stack address from the terminated thread's stack.
+
+Even if you need values from a created thread, it usually makes more sense to pass that data in another way. pthread_join is not a must, other ways to pass return values can be used by the application.
+
+**Recycling**
+
+Recycling releases any system or process resources left. Like the storage used for the thread's return value, the stack, memory for register state etc. Some of these may have been released at termination; none should be accessed after termination.
+
+*NOTE*  
+Once a thread is recycled, the thread ID (pthread_t) is no longer valid. The terminated thread's ID may be assigned to a new thread. You could cancel a different thread, for example.
+
+You must release program resources owned by the thread. Dynamic memory can be freed at any time, from any thread. Mutexes, condition variables, semaphores may be destroyed by any thread, as long as they are unlocked. If a thread terminates while having a mutex locked, that mutex won't be usable anymore, since it should have been unlocked by that thread.
+
+
+
 
