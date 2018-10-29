@@ -5,6 +5,7 @@
 0. About
 1. Introduction
 2. Threads
+3. Synchronization
 
 ## 0. About
 
@@ -116,7 +117,7 @@ Source code: ```001_05_thread_error.c```
 
 The one exception to the error rules above is *pthread_get_specific*, which does not report errors at all, since it has to be as fast as possible.
 
-## Threads
+## 2. Threads
 
 ### Creating and using threads
 
@@ -202,6 +203,14 @@ Once a thread is recycled, the thread ID (pthread_t) is no longer valid. The ter
 
 You must release program resources owned by the thread. Dynamic memory can be freed at any time, from any thread. Mutexes, condition variables, semaphores may be destroyed by any thread, as long as they are unlocked. If a thread terminates while having a mutex locked, that mutex won't be usable anymore, since it should have been unlocked by that thread.
 
+## 3. Synchronization
 
+### Critical sections and invariants
+
+*Invariants* are assumptions made by a program, especially assumptions about the relationships between sets of variables. For example, the invariant of a queue package are: the queue header must either be NULL or contain a pointer to the first queued data element; each data element must contain a pointer to the next data element, or NULL if it is the last.
+
+*Critical sections* (or serial regions) are areas of code that affect a shared state. It almost always translates to a data invariant. For example, the code performing the removal of an element from the queue can be seen as a critical section in the code, or you can see the state of the queue as an invariant. For a while, during the removal, the invariant is broke, but through syncrhonization, it is "repaired" before other code encounters it.
+
+*Predicates* are logical expressions that describe the sate of invariants needed by your code. Example: a boolen value, a comparison with NULL, if a counter is greater than somethin etc.
 
 
