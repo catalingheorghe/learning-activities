@@ -6,15 +6,15 @@
 
 0. [About](#0-about)
 1. [Notes](#1-notes)
-2. [Review](#2.-review)
+2. [Review](#2-review)
 
-# 0 About
+# 0. About
 
  - Safari [link](https://learning.oreilly.com/library/view/learning-perl-7th/9781491954317/)
  - Companion website [link](https://www.learning-perl.com/)
  - Companion workbook with exercises [link](https://learning.oreilly.com/library/view/learning-perl-student/9781449328047/)
 
-# 1 Notes
+# 1. Notes
 
 ## General/intro
 
