@@ -29,14 +29,14 @@ Perl programs are not compiled by the user. The perl interpreter compiles the so
 
 perldoc contains thousands of pages of documentation
 
-```
-    $ perldoc perl
-    $ perldoc perlfunc
-    $ perldoc perlvar
-    $ perldoc -f print
-    $ perldoc -v '$_'
-    $ perldoc -q open # search the faq
-    (others ...)
+```bash
+$ perldoc perl
+$ perldoc perlfunc
+$ perldoc perlvar
+$ perldoc -f print
+$ perldoc -v '$_'
+$ perldoc -q open # search the faq
+(others ...)
 ```
 
 Running perl with -w (see perldiag) shows you warnings `perl -w ...`.
@@ -49,28 +49,28 @@ All **numbers** in Perl are internally double-precision floating point numbers. 
 
 You can write long integer literals with underscores `61_298_232_392_765` (*not with commas*).
 
-```
-    255
-    0377       # octal
-    0xff       # hex, still 255
-    0b11111111 # binary
-    255.000
-    1.25
-    7.2e45  # 7.2 x 10 to the 45th
-    -12E-24 # negative 12 x 10 to the -24th
-    0x1.8p1 # hexadecimal floating point literals (v5.22)
-            # 1.8 hex X 2 to the 1st power = 3 dec
+```perl
+255
+0377       # octal
+0xff       # hex, still 255
+0b11111111 # binary
+255.000
+1.25
+7.2e45  # 7.2 x 10 to the 45th
+-12E-24 # negative 12 x 10 to the -24th
+0x1.8p1 # hexadecimal floating point literals (v5.22)
+        # 1.8 hex X 2 to the 1st power = 3 dec
 ```
 
 Numbers are in floating point:
 
-```
+```perl
 10 / 3  # 3.33333 ..., not 3 - all floating point division
 ```
 
 Operators: 
 
-```
+```perl
 + - * / % **
 ```
 
@@ -81,27 +81,27 @@ Built-in support for Unicode, but not enabled by default. To interpret the sourc
 String literals - single-quoted or double-quoted (backslash - control characters and others).
 Also, double-quoted strings are variable interpolated - variable current values are replaced when the string is used.
 
-    ```
-    'fred'
-    'don\'t'
-    'newline
-    here'
-    'no newline\nhere'
+```perl
+'fred'
+'don\'t'
+'newline
+here'
+'no newline\nhere'
 
-    "hello world\n"   # newline
-    "tab\there"
-    "\x{2668}"        # unicode HOT SPRINGS character code point
-    "N{SNOWMAN}"      # unicode SNOWMAN by name
-    ```
+"hello world\n"   # newline
+"tab\there"
+"\x{2668}"        # unicode HOT SPRINGS character code point
+"N{SNOWMAN}"      # unicode SNOWMAN by name
+```
 
 Operators:
 
-    ```
-    "hello" . "world" # . concatenates strings
-    "fred" x 3        # repetition
-    5 x 4.8           # left operand of x is converted to string;
-                      # right operand is truncated to an int
-    ```
+```perl
+"hello" . "world" # . concatenates strings
+"fred" x 3        # repetition
+5 x 4.8           # left operand of x is converted to string;
+                  # right operand is truncated to an int
+```
 
 Perl will automatically convert between numbers and strings, depending on what the operators expect.
 
@@ -109,7 +109,7 @@ Perl will automatically convert between numbers and strings, depending on what t
 
 Non-decimal notations to numbers:
 
-```
+```perl
 hex('DEADBEEF')     # 3_735_928_559 decimal
 hex('OxDEADBEEF')   # 3_735_928_559 decimal
 
@@ -135,7 +135,7 @@ The ! operator normalizes to 1 or 0 (the opposite logical value).
 
 **User input**: simplest way is the line-input operator `<STDIN>`. It will return the line entered at stdinput by the user, including the newline. To remove the newline - `chomp()`. 
 
-```
+```perl
 chomp($text = <STDIN>);   # read the text, assign to variable, use the chomp on the variable
 
 $text = <STDIN>;
@@ -166,7 +166,7 @@ Index outside bonds of array - undef (just like an uninitialized scalar variable
 If you store beyond the end, perl will extend the array with undef values until that point.  
 Negative indexes can be used to count from the end of the array. # is used for last index of array.
 
-```
+```perl
 $end = $#rocks;                  # 99, which is the last element's index
 $number_of_rocks = $end + 1;     # OK, but you'll see a better way later
 $rocks[ $#rocks ] = 'hard rock'; # the last rock
@@ -180,7 +180,7 @@ A list literal is a comma separated values inside parentheses.
 The `..` can be used for consecutive ranges (it only counts up, not down).  
 If the element is a variable, it will be evaluated every time the literal is used.
 
-```
+```perl
 (1, 2, 3)
 (1, 2..29)
 ( )
@@ -190,7 +190,7 @@ If the element is a variable, it will be evaluated every time the literal is use
 
 `qw` *(quoted words)* can be used to generate a literal of strings with less typing. Treated like single-quoated strings with the whitespaces being insignificant. Any char, not only `(`, can be used as a delimiter.
 
-```
+```perl
 qw( fred barney dino wilma )
 qw( fred  barney
 	dino )
@@ -203,7 +203,7 @@ qw{
 
 **List assignment**
 
-```
+```perl
 ($fred, $barney, $dino) = ("flint", "rubble", undef);
 
 ($fred, $barney) = ($barney, $fred)          # swap
@@ -214,7 +214,7 @@ perl ignores extra values on the right, or puts undef for extra variables on the
 
 So, an entire array could be build up with list assigning all the elements, but perl offer @ for refering to the entire array.
 
-```
+```perl
 ($rocks[0], $rocks[1], $rocks[2]) = qw[ talc mica quartz ];
 
 @rocks = qw<talc mica quartz>;
@@ -231,7 +231,7 @@ $dino   = "granite";
 
 **Pop and push operators** for treating the array like a stack.
 
-```
+```perl
 @array = 5..9;
 
 $fred = pop(@array);
@@ -245,14 +245,14 @@ push @array, @others;
 
 **Shift and unshift** do the same thing at the "left-side" of the array.
 
-```
+```perl
 unshift @array, 5;
 $five = shift(@array);
 ```
 
 The **splice** operator lets you manipulate elements in the middle of the array. Two mandatory args, two more optional.
 
-```
+```perl
 @array = qw( pebbles dino fred barney betty );
 @removed = splice @array, 2; # remove fred and everything after
                              # @removed is qw(fred barney betty)
@@ -276,7 +276,7 @@ Arrays are **interpolated into double-quoted strings**, with spaces between elem
 
 To go through each element of a list or array, perl has **foreach**. The control variable is not a copy of the list element, it is the actual element, so it can modify the list values. Also, the control variable will have the same value as before the `foreach` construct, when finished.
 
-```
+```perl
 $rock = 'shale';
 foreach $rock (@rocks) {
 	$rock .= "\n";   # add newline to each element
