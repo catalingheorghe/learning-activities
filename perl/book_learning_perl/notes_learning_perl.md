@@ -29,7 +29,7 @@ Perl programs are not compiled by the user. The perl interpreter compiles the so
 
 perldoc contains thousands of pages of documentation
 
-    ```
+```
     $ perldoc perl
     $ perldoc perlfunc
     $ perldoc perlvar
@@ -37,7 +37,7 @@ perldoc contains thousands of pages of documentation
     $ perldoc -v '$_'
     $ perldoc -q open # search the faq
     (others ...)
-    ```
+```
 
 Running perl with -w (see perldiag) shows you warnings `perl -w ...`.
 
@@ -49,7 +49,7 @@ All **numbers** in Perl are internally double-precision floating point numbers. 
 
 You can write long integer literals with underscores `61_298_232_392_765` (*not with commas*).
 
-    ```
+```
     255
     0377       # octal
     0xff       # hex, still 255
@@ -60,19 +60,19 @@ You can write long integer literals with underscores `61_298_232_392_765` (*not 
     -12E-24 # negative 12 x 10 to the -24th
     0x1.8p1 # hexadecimal floating point literals (v5.22)
             # 1.8 hex X 2 to the 1st power = 3 dec
-    ```
+```
 
 Numbers are in floating point:
 
-    ```
-    10 / 3  # 3.33333 ..., not 3 - all floating point division
-    ```
+```
+10 / 3  # 3.33333 ..., not 3 - all floating point division
+```
 
 Operators: 
 
-    ```
-    + - * / % **
-    ```
+```
++ - * / % **
+```
 
 **Strings** are a sequence of characters. Shortest one is the *empty string*. Longest string fills all your memory. Strings can contain binary data, like an image.
 
@@ -109,16 +109,16 @@ Perl will automatically convert between numbers and strings, depending on what t
 
 Non-decimal notations to numbers:
 
-    ```
-    hex('DEADBEEF')     # 3_735_928_559 decimal
-    hex('OxDEADBEEF')   # 3_735_928_559 decimal
+```
+hex('DEADBEEF')     # 3_735_928_559 decimal
+hex('OxDEADBEEF')   # 3_735_928_559 decimal
 
-    oct('0377')         # 255 decimal
-    oct('377')          # 255 decimal
-    oct('0xDEADBEEF')   # 3_735_928_559 decimal, saw leading 0x
-    oct('0b1101')       # 13 decimal, saw leading 0b
-    oct("0b$bits")      # convert $bits from binary
-    ```
+oct('0377')         # 255 decimal
+oct('377')          # 255 decimal
+oct('0xDEADBEEF')   # 3_735_928_559 decimal, saw leading 0x
+oct('0b1101')       # 13 decimal, saw leading 0b
+oct("0b$bits")      # convert $bits from binary
+```
 
 A **scalar variable** holds one value. Starts with *sigil*, $, and then alphanumerics and underscore (can't start with a digit). Names are case sensitive. The sigil is used to distinguish from any special word in Perl. Also, the $ denotes that this variable stores a single item. (all caps names indicates a special variable - avoid to not clash with a perl variable)
 
@@ -135,16 +135,16 @@ The ! operator normalizes to 1 or 0 (the opposite logical value).
 
 **User input**: simplest way is the line-input operator `<STDIN>`. It will return the line entered at stdinput by the user, including the newline. To remove the newline - `chomp()`. 
 
-    ```
-    chomp($text = <STDIN>);   # read the text, assign to variable, use the chomp on the variable
+```
+chomp($text = <STDIN>);   # read the text, assign to variable, use the chomp on the variable
 
-    $text = <STDIN>;
-    chomp($text);             # same, but in two steps
-                              # return value: no of chars removed - 1 or 0.
-                              #  it removes only one newline
+$text = <STDIN>;
+chomp($text);             # same, but in two steps
+                          # return value: no of chars removed - 1 or 0.
+                          #  it removes only one newline
 
-    chomp $text;              # paranthesis can be omitted if they don't change the meaning
-    ```
+chomp $text;              # paranthesis can be omitted if they don't change the meaning
+```
 
 Uninitialized variables have the *undef* value. undef is interpreted as 0 or as the empty string, so variables can be used directly. To check for undef, the function `defined` is used. Ex: <STDIN> return undef on no input, like end-of-file, so defined can be used to stop. 
 
@@ -166,109 +166,109 @@ Index outside bonds of array - undef (just like an uninitialized scalar variable
 If you store beyond the end, perl will extend the array with undef values until that point.  
 Negative indexes can be used to count from the end of the array. # is used for last index of array.
 
-    ```
-    $end = $#rocks;                  # 99, which is the last element's index
-    $number_of_rocks = $end + 1;     # OK, but you'll see a better way later
-    $rocks[ $#rocks ] = 'hard rock'; # the last rock
+```
+$end = $#rocks;                  # 99, which is the last element's index
+$number_of_rocks = $end + 1;     # OK, but you'll see a better way later
+$rocks[ $#rocks ] = 'hard rock'; # the last rock
 
-    $rocks[ -1 ]   = 'hard rock';   # easier way to do that last example
-    $dead_rock     = $rocks[-100];  # gets 'bedrock'
-    $rocks[ -200 ] = 'crystal';     # fatal error!
-    ```
+$rocks[ -1 ]   = 'hard rock';   # easier way to do that last example
+$dead_rock     = $rocks[-100];  # gets 'bedrock'
+$rocks[ -200 ] = 'crystal';     # fatal error!
+```
 
 A list literal is a comma separated values inside parentheses.  
 The `..` can be used for consecutive ranges (it only counts up, not down).  
 If the element is a variable, it will be evaluated every time the literal is used.
 
-    ```
-    (1, 2, 3)
-    (1, 2..29)
-    ( )
-    (1, "fred", $m)
-    (0..$#rocks)
-    ```
+```
+(1, 2, 3)
+(1, 2..29)
+( )
+(1, "fred", $m)
+(0..$#rocks)
+```
 
 `qw` *(quoted words)* can be used to generate a literal of strings with less typing. Treated like single-quoated strings with the whitespaces being insignificant. Any char, not only `(`, can be used as a delimiter.
 
-    ```
-    qw( fred barney dino wilma )
-    qw( fred  barney
-        dino )
-    qw/ fred barney /
-    qw{ 
-        /usr/bin
-        /usr/local/bin
-    }
-    ```
+```
+qw( fred barney dino wilma )
+qw( fred  barney
+	dino )
+qw/ fred barney /
+qw{ 
+	/usr/bin
+	/usr/local/bin
+}
+```
 
 **List assignment**
 
-    ```
-    ($fred, $barney, $dino) = ("flint", "rubble", undef);
+```
+($fred, $barney, $dino) = ("flint", "rubble", undef);
 
-    ($fred, $barney) = ($barney, $fred)          # swap
-    ($rock[0], $rock[1]) = ($rock[1], $rock[0])
-    ```
+($fred, $barney) = ($barney, $fred)          # swap
+($rock[0], $rock[1]) = ($rock[1], $rock[0])
+```
 
 perl ignores extra values on the right, or puts undef for extra variables on the left.
 
 So, an entire array could be build up with list assigning all the elements, but perl offer @ for refering to the entire array.
 
-    ```
-    ($rocks[0], $rocks[1], $rocks[2]) = qw[ talc mica quartz ];
+```
+($rocks[0], $rocks[1], $rocks[2]) = qw[ talc mica quartz ];
 
-    @rocks = qw<talc mica quartz>;
-    @tiny   = ( );                       # the empty list
-    @giant  = 1..1e5;                    # a list with 100,000 elements
-    @stuff  = (@giant, undef, @giant);   # a list with 200,001 elements
-    $dino   = "granite";
-    @quarry = (@rocks, "crushed rock", @tiny, $dino); # @tiny does not add an undef element to quarry
+@rocks = qw<talc mica quartz>;
+@tiny   = ( );                       # the empty list
+@giant  = 1..1e5;                    # a list with 100,000 elements
+@stuff  = (@giant, undef, @giant);   # a list with 200,001 elements
+$dino   = "granite";
+@quarry = (@rocks, "crushed rock", @tiny, $dino); # @tiny does not add an undef element to quarry
 
-    @copy = @quarry  # still a list assignment; copy a list from one array to another
-    ```
+@copy = @quarry  # still a list assignment; copy a list from one array to another
+```
 
 > Perl data structures cookbook: perldsc - arrays of arrays etc
 
 **Pop and push operators** for treating the array like a stack.
 
-    ```
-    @array = 5..9;
+```
+@array = 5..9;
 
-    $fred = pop(@array);
-    $barney = pop @array;
-    pop @array;   # void-context, discard poped value
+$fred = pop(@array);
+$barney = pop @array;
+pop @array;   # void-context, discard poped value
 
-    push(@array, 0);
-    push @array, 8..10;
-    push @array, @others;
-    ```
+push(@array, 0);
+push @array, 8..10;
+push @array, @others;
+```
 
 **Shift and unshift** do the same thing at the "left-side" of the array.
 
-    ```
-    unshift @array, 5;
-    $five = shift(@array);
-    ```
+```
+unshift @array, 5;
+$five = shift(@array);
+```
 
 The **splice** operator lets you manipulate elements in the middle of the array. Two mandatory args, two more optional.
 
-    ```
-    @array = qw( pebbles dino fred barney betty );
-    @removed = splice @array, 2; # remove fred and everything after
-                                 # @removed is qw(fred barney betty)
-                                 # @array is qw(pebbles dino)
+```
+@array = qw( pebbles dino fred barney betty );
+@removed = splice @array, 2; # remove fred and everything after
+                             # @removed is qw(fred barney betty)
+                             # @array is qw(pebbles dino)
 
-    @array = qw( pebbles dino fred barney betty );
-    @removed = splice @array, 1, 2; # remove dino, fred
-                                    # @removed is qw(dino fred)
-                                    # @array is qw(pebbles barney betty)
+@array = qw( pebbles dino fred barney betty );
+@removed = splice @array, 1, 2; # remove dino, fred
+                                # @removed is qw(dino fred)
+                                # @array is qw(pebbles barney betty)
 
-    @array = qw( pebbles dino fred barney betty );
-    @removed = splice @array, 1, 2, qw(wilma); # remove dino, fred
-                                    # @removed is qw(dino fred)
-                                    # @array is qw(pebbles wilma
-                                    #                barney betty)
-    ```
+@array = qw( pebbles dino fred barney betty );
+@removed = splice @array, 1, 2, qw(wilma); # remove dino, fred
+                                # @removed is qw(dino fred)
+                                # @array is qw(pebbles wilma
+                                #                barney betty)
+```
 
 If you specify 0 elements to remove, you can just insert the replacement list into that position.
 
@@ -276,14 +276,14 @@ Arrays are **interpolated into double-quoted strings**, with spaces between elem
 
 To go through each element of a list or array, perl has **foreach**. The control variable is not a copy of the list element, it is the actual element, so it can modify the list values. Also, the control variable will have the same value as before the `foreach` construct, when finished.
 
-    ```
-    $rock = 'shale';
-    foreach $rock (@rocks) {
-        $rock .= "\n";   # add newline to each element
-        ... # yada yada yada operator - compiles, but fatal error if encountered when running
-    }
-     # $rock is still shale
-    ```
+```
+$rock = 'shale';
+foreach $rock (@rocks) {
+	$rock .= "\n";   # add newline to each element
+    ... # yada yada yada operator - compiles, but fatal error if encountered when running
+}
+ # $rock is still shale
+```
 
 If the control variable is omitted, TODO
 
