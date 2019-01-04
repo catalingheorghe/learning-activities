@@ -285,9 +285,89 @@ foreach $rock (@rocks) {
  # $rock is still shale
 ```
 
-If the control variable is omitted, TODO
+If the control variable is omitted, perl uses the special variable `$_` in the loop. (`$_` is perl's most common default variable, but not the only one). Ex: `print;` will also print the value of `$_`.
 
-**test**
+The **reverse** operator takes a list of values and returns a reversed list. Can be used in combination with the range operator, for example, to count down.  
+It does not affect its arguments, it returns a different value.
+
+The **sort** operator takes a list of values and sorts them in internal character order, by default, which is unicode code point order. It also outputs a new value.  
+Note that numbers are also sorted in char order, not numerically (by default).
+
+The **each** operator can be used to go through the index and the value of the elements in an array. It applies to arrays since v5.12. It was originally applied to hashes.
+
+```perl
+@wilma = reverse 5..10;
+
+@fred = sort(qw/ bedrock slate rubble/);
+
+while ( ($index, $value) = each @fred ) {
+    print "$index: $value\n");
+}
+```
+
+**Scalar and list context**
+
+Depending on the context of the expression, the same thing can be interpreted differently by perl. One example of this is the numerical vs string operators. An array name can give a list or a single scalar value
+
+```perl
+@people = qw( fred barney betty );
+@sorted = sort @people;  # list context: barney, betty, fred
+$number = 42 + @people;  # scalar context: 42 + 3 gives 45
+
+@list = @people; # a list of three people
+$n = @people;    # the number 3
+```
+
+List producing expressions can return various things in scalar context (where perl expects a scalar). You can't make any assumption and you must check the doc.
+
+```perl
+@backwards = reverse qw/ yabba dabba doo /;
+    # gives doo, dabba, yabba
+$backwards = reverse qw/ yabba dabba doo /;
+    # gives oodabbadabbay
+```
+
+Examples of list vs scalar contexts:
+
+```perl
+$fred = something;            # scalar context
+@pebbles = something;         # list context
+($wilma, $betty) = something; # list context
+($dino) = something;          # still list context!
+
+# scalar
+$fred = something;
+$fred[3] = something;
+123 + something
+something + 654
+if (something) { ... }
+while (something) { ... }
+$fred[something] = something;
+
+# list
+@fred = something;
+($fred, $barney) = something;
+($fred) = something;
+push @fred, something;
+foreach $fred (something) { ... }
+sort something
+reverse something
+print something
+```
+
+A scalar production expression is automatically promoted to a one element list in a list context. Note that `undef` is also a scalar, so to empty an array you assign the empty list `( )`.
+
+To force a scalar context, you use the fake function `scalar`, which tells perl to provide a scalar context.
+
+```perl
+@rocks = qw( talc quartz jade obsidian );
+print "How many rocks do you have?\n";
+print "I have ", @rocks, " rocks!\n";        # WRONG, prints names of rocks
+print "I have ", scalar @rocks, " rocks!\n"; # Correct, gives a number
+```
+
+**<STDIN> in list context** returns all the remaining input until EOF, one line in each list element.  
+To discard newlines from all elements, just use `chomp` on the array. 
 
 # 2. Review
 

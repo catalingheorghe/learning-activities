@@ -9,4 +9,6 @@
 
  - Style http://perldoc.perl.org/perlstyle.html
 
+ - Data structures https://perldoc.perl.org/perldsc.html
+
 
