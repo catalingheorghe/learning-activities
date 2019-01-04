@@ -355,7 +355,7 @@ reverse something
 print something
 ```
 
-A scalar production expression is automatically promoted to a one element list in a list context. Note that `undef` is also a scalar, so to empty an array you assign the empty list `( )`.
+A scalar producing expression is automatically promoted to a one element list in a list context. Note that `undef` is also a scalar, so to empty an array you assign the empty list `( )`.
 
 To force a scalar context, you use the fake function `scalar`, which tells perl to provide a scalar context.
 
@@ -368,6 +368,106 @@ print "I have ", scalar @rocks, " rocks!\n"; # Correct, gives a number
 
 **<STDIN> in list context** returns all the remaining input until EOF, one line in each list element.  
 To discard newlines from all elements, just use `chomp` on the array. 
+
+## Subroutines
+
+Subroutine names are from a different namespace, so they can't clash with scalar names for example. Usually the name has in front an `&`, but it some cases it is not allowed.
+
+Subroutines can be defined anywhere in the program.  
+No forward declaration needed.  
+The last definition of same subroutine overwrites the previous one.
+Subroutines can access any global variable.
+
+```perl
+sub marine {
+  $n += 1;  # Global variable $n
+  print "Hello, sailor number $n!\n";
+}
+```
+
+To invoke the subroutine: `&marine`.
+
+All Perl subroutines have a return value. Not necessarily a useful one. Whatever calculation is last performed in a subroutine is also the return value.
+
+Be careful with extra statements. Below, the return value will be 1, the one from `print`.
+
+```perl
+sub sum_of_fred_and_barney {
+  print "Hey, you called the sum_of_fred_and_barney subroutine!\n";
+  $fred + $barney;  # That's not really the return value!
+  print "Hey, I'm returning a value now!\n";      # Oops!
+}
+```
+
+To pass arguments to a subroutine, you give it a list of arguments. Perl makes the parameter list available to the subroutine, by copying it, in the special array variable `@_`. First argument is in `$_[0]`, but it has nothing to do with the `$_` special variable.
+
+Perl doesn't care if insufficient arguments are passed. Beyond `@_` there are undefs. Also, it doesn't care if too many parameters are passed, they are just ignored if the subroutine does not access them.
+
+The `@_` is private to the subroutine. The outside scope value is preserved. This why a subroutine can pass arguments to another subroutine.
+
+Private variables for a subroutine, called **lexical variables**, can be created at any time with the `my` operator.
+
+```perl
+sub max {
+  if (@_ != 2) {
+    print "WARNING! &max should get exactly two arguments!\n";
+  }  
+  my($m, $n) = @_   # new, private variables for this block
+                    #  which take the parameters provided
+  if ($m > $n) { $m } else { $n }
+}
+```
+
+Usually in Perl, subroutine take variable list of parameters and are written so that they can adapt to that. Example of max:
+
+```perl
+$maximum = &max(3, 5, 10, 4, 6);
+
+sub max {
+  my($max_so_far) = shift @_;  # the first one is the largest yet seen
+  foreach (@_) {               # look at the remaining arguments
+    if ($_ > $max_so_far) {    # could this one be bigger yet?
+      $max_so_far = $_;
+    }
+  }
+  $max_so_far;
+}
+```
+
+*Note that there is no special connection between `@_` and `$_`.*
+
+Take note also that a subroutine should also handle and empty parameter list. In the example above, it returns `undef`, which is ok.
+
+**Note:** lexical (my) variables can be used in any block, they are not special to subroutines. If there is no enclosing block, it will be private to the source file.
+
+**Note:** `my` does not change the context.
+
+```perl
+my($num) = @_;  # list context, same as ($num) = @_; - gets first param
+my $num  = @_;  # scalar context, same as $num = @_; - get num of params
+```
+
+The **`use strict`** pragma can be used to tell the compiler to enforce strict variable rules in the containing block or file. Starting with 5.12, this is implicit when you declare a minimum Perl version. Note that $a and $b are not checked, since they are used by sort. The recommendation is to use it if the program is longer that a screen.
+
+To return early from a subroutine, use the **return** operator. An empty return gives an undef or an empty list, depending if the subroutine is called in a scalar or list context.
+
+If Perl can tell that it is a subroutine call, the ampersand can be omitted. However, if the subroutine has the same name a Perl build-in, you must use the ampersand.
+
+A subroutine can **return nonscalar values**. If a subroutine is called in a list context, it can return a list of values. The function `wantarray` tells if a subroutine is being evaluated in a scalar or list context.
+
+**Persistent private variables** can be created with `state`, instead of `my`. The values will be kept between calls. Any variable type can be made 'state', not only scalars.
+
+```perl
+use v5.10;
+
+sub marine {
+  state $n = 0;  # private, persistent variable $n
+  $n += 1;
+  print "Hello, sailor number $n!\n";
+}
+```
+
+Perl v5.20 added **subroutine signatures** as an experimental feature. See perlsub.
 
 # 2. Review
 
