@@ -469,6 +469,203 @@ sub marine {
 
 Perl v5.20 added **subroutine signatures** as an experimental feature. See perlsub.
 
+## Input and Output
+
+**Input from Standard input**
+
+`<STDIN>` - line-input operator around a file-handle STDIN. It will return undef when reaching end-of-file.
+
+```perl
+# scalar context
+while (defined($line = <STDIN>)) {
+  print "I saw $line";
+}
+
+# shortcut with the use of perl's favourite default value $_
+#  only works if there is nothing but the line-input operator in the
+#  conditional of a while loop; no other connection between <> and $_
+while (<STDIN>) {
+  print "I saw $_";
+}
+
+# list context
+#  here the entire input is stored in a list first, before the loop starts!
+foreach (<STDIN>) {
+  print "I saw $_";
+}
+```
+
+**Input from the Diamond operator <>**
+
+For a perl program that can be used like utilities cat, sed, awk, sort, grep, etc. Standard unit tools process files given to them as command line arguments one after another. If nothing is given, or if `-` is used instead of a file name, it reads from standard input. This is what the `<>` does: it reads from the files given as arguments, one line after another, in one big input.
+
+```perl
+while (defined($line = <>)) {
+  chomp($line);
+  print "It was $line that I saw!\n";
+}
+# name of file is stored in $ARGV special variable;
+
+# or while (<>) shortcut
+```
+
+For v5.22 or higher use the double command `<<>>` to avoid interpreting a | in a file name (open a pipe input to an external program).
+
+*The invocation arguments* - @ARGV array with all the arguments - normal array. This is what the diamond operator uses. You can tinker with the @ARGV array before calling the diamond operator.
+
+**Output to Standard Output**
+
+`print` takes a list of values and sends each item, as strings, to standard output, no spaces between.
+
+```perl
+print <>;          # implementation of /bin/cat
+print sort <>;     # implementation of /bin/sort
+
+ # Perl Power Tools project - goal is to implement all Unix standard utilities
+```
+
+if there are not parentheses, print is a list operator. If there are parentheses, print is a function call that will print what is found inside the parentheses.
+
+Formatted output, C-style, can be done with `printf fmt_string list_of_things;`. For doc: <sprintf> in perlfunc.  
+The format is an expression that can be computed. Ex: `printf "The items are:\n".("%10s\n" x @items), @items;`.
+
+**Filehandles**
+
+*Filehandle* = name of an I/O connection between your Perl process and the outside. Initially, they were barewords. v5.6 added the ability to store them into scalar variables. Recommendation to use uppercase barewords, to not clash with reserved words.
+
+Special names: STDIN, STDOUT, STDERR, DATA, ARGV, ARGVOUT.
+
+Opening a file handle: `open`.
+
+```perl
+open CONFIG, 'dino';
+open CONFIG, '<dino';   # open for input, default
+open BEDROCK, '>fred';
+open LOG, '>>logfile';
+
+my $selected_output = 'my_output';
+open LOG, "> $selected_output";
+ # the space avoids an append if the variable is ">something", for ex
+```
+
+Starting with 5.6, the way of opening is separated into a separate argument. This is recommended. It also allows specified the encoding.
+
+```perl
+open CONFIG, '<', 'dino';
+open BEDROCK, '>', $file_name;
+open LOG, '>>', &logfile_name();
+
+open CONFIG, '<:encoding(UTF-8)', 'dino';
+open BEDROCK, '>:encoding(UTF-8)', $file_name;
+open LOG, '>>:encoding(UTF-8)', &logfile_name();
+ # :utf-8 can be used as a shortcut, but it is not exactly the same thing; it does not
+$ ensure that the data is in utf-8 encoding, it just treats it as such
+```
+
+Get all the encodings with this oneliner: `perl -MEncode -le "print for Encode->encodings(':all')"`
+
+Other layer that handles transformation of input/output: ensure that at the end of each line there is a CR-LF - `:>crlf` - newlines (LF) will be transformed to CR-LF; or the other way around `:<crlf` to read a DOS line-endings file - CR-LF will be translated by Perl to LF when reading the file.
+
+You can modify layers at anytime by **binmoding** a filehandle.
+
+```perl
+binmode STDOUT; # don't translate line endings
+binmode STDERR; # don't translate line endings
+binmode STDOUT, ':encoding(UTF-8)'; # STDOUT has to know how to handle utf-8
+binmode STDIN, ':encoding(UTF-8)';
+```
+
+Reading from a **bad filehandle** (file not opened properly or closed network connection), gives an end-of-file. Writing will just silently discard the data.  
+`open` returns true for success, false for failure.
+
+To **close** a filehandle: `close BEDROCK`. It will flush output buffers and release any file locks.  
+Perl automatically closes a filehandle if it is reused in another open (or if the program terminates, of course).
+
+----
+
+Fatal errors with **die function** : the `die` function prints the message to STDERR and terminates the program with a nonzeor exit status. The errno associated string from a system or library call (like `perror) is available in `$!`. If the message has a newline, the file name and line number won't be reported.
+
+```perl
+if ( ! open LOG, '>>', 'logfile' ) {
+  die "Cannot create logfile: $!";
+}
+
+if (@ARGV < 2) {
+  die "Not enough arguments\n";
+}
+```
+
+Messages like **warnings** can be produced with `warn` function. Similar to `die`, except for terminating the program.
+
+To automatically die on failed system calls, since v5.10, you can used the **autodie** pragma.
+
+----
+
+To **use a filehandle** is similar to the using STDIN, for example.
+
+```perl
+if ( ! open PASSWD, "/etc/passwd") {
+  die "How did you get logged in? ($!)";
+}
+
+while (<PASSWD>) {
+  chomp;
+  others(...)
+}
+```
+
+If a filehandle is open for writing or appending, the handle can be used in print or printf, before the argument list.
+
+```perl
+print LOG "Captain's log, stardate 3.14159\n";  # output goes to LOG
+printf STDERR "%d percent complete.\n", $done/$total * 100;
+```
+No comma between the file handle and the items to be printed.
+
+The `select` operator can change the default output file handle (`select BEDROCK;`). By default, the output of each filehandle is buffered. To change the behaviour of the currently selected filehandle, set `$|` to 1. The setting on that filehandle remains even after the selected one is changed.
+
+```perl
+select LOG;
+$| = 1;  # don't keep LOG entries sitting in the buffer
+select STDOUT;
+ # ... time passes, babies learn to walk, tectonic plates shift, and then...
+print LOG "This gets written to the LOG at once!\n";
+```
+
+To standard messages to file, the standard filehandles can be re-opened. Perl will not close the standard ones until it makes sure that it can open the file.
+
+```perl
+ # Send errors to my private error log
+if ( ! open STDERR, ">>/home/barney/.error_log") {
+  die "Can't open error log for append: $!";
+}
+```
+
+**Filehandles in a Scalar** (since v5.6)
+
+If you use a scalar variable without a value instead of a bareword in open, the filehandle is put in that variable. Some prefer to put a *_fh* at the of the names of these variables. 
+
+```perl
+my $rocks_fh;
+open $rocks_fh, '<', 'rocks.txt'
+  or die "Could not open rocks.txt: $!";
+
+open my $rocks_fh, '<', 'rocks.txt'
+  or die "Could not open rocks.txt: $!";
+
+while( <$rocks_fh> ) {
+  chomp;
+  stuff;
+}
+```
+
+Note that for print it is important to not put a comma after the filehandle, bareword or scalar variable; otherwise, perl will interpret the scalar variable as part of the items to print and it will print a stringification of that; for bareword, perl knows that it is a filehandle (if you just give print a bareword, it will print the content of `$_`).
+
+```perl
+print STDOUT;
+print $rocks_fh;  # WRONG, probably
+```
+
 # 2. Review
 
 
