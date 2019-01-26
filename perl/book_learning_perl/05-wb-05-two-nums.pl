@@ -13,7 +13,9 @@ print "@ARGV\n";
 my @headings = qw/ first second sum product % /;
 my $width = 10;
 printf "%${width}s %${width}s %${width}s %${width}s %${width}s\n", @headings;
-printf "%${width}g %${width}g %${width}g %${width}g %${width}.2f\n", ($ARGV[0], $ARGV[1], 
+printf "%${width}g %${width}g %${width}g %${width}g %${width}.2f\n", 
+	   ($ARGV[0], 
+		$ARGV[1], 
         $ARGV[0] + $ARGV[1],
         $ARGV[0] * $ARGV[1],
         ($ARGV[0] * 100) / $ARGV[1]);

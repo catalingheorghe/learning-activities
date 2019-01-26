@@ -16,7 +16,7 @@
 
 # 1. Notes
 
-## General/intro
+## Ch 1. General/intro
 
 No main routine. The "main" program consists of the Perl statements (not including anything in subroutines).  
 There is no special section for variable declaration (it doesn't mean that you can't declare them).
@@ -41,7 +41,7 @@ $ perldoc -q open # search the faq
 
 Running perl with -w (see perldiag) shows you warnings `perl -w ...`.
 
-## Scalar data
+## Ch 2. Scalar data
 
 A scalar is a single thing.
 
@@ -148,7 +148,7 @@ chomp $text;              # paranthesis can be omitted if they don't change the 
 
 Uninitialized variables have the *undef* value. undef is interpreted as 0 or as the empty string, so variables can be used directly. To check for undef, the function `defined` is used. Ex: <STDIN> return undef on no input, like end-of-file, so defined can be used to stop. 
 
-## Lists and arrays
+## Ch 3. Lists and arrays
 
 List = ordered collection of scalars.  
 Array = a variable that contains a list.  
@@ -366,12 +366,12 @@ print "I have ", @rocks, " rocks!\n";        # WRONG, prints names of rocks
 print "I have ", scalar @rocks, " rocks!\n"; # Correct, gives a number
 ```
 
-**<STDIN> in list context** returns all the remaining input until EOF, one line in each list element.  
+**`<STDIN>` in list context** returns all the remaining input until EOF, one line in each list element.  
 To discard newlines from all elements, just use `chomp` on the array. 
 
-## Subroutines
+## Ch 4. Subroutines
 
-Subroutine names are from a different namespace, so they can't clash with scalar names for example. Usually the name has in front an `&`, but it some cases it is not allowed.
+Subroutine names are from a different namespace, so they can't clash with scalar names for example. Usually the name has in front an `&`, but in some cases it is not allowed.
 
 Subroutines can be defined anywhere in the program.  
 No forward declaration needed.  
@@ -436,7 +436,7 @@ sub max {
 
 *Note that there is no special connection between `@_` and `$_`.*
 
-Take note also that a subroutine should also handle and empty parameter list. In the example above, it returns `undef`, which is ok.
+Take note also that a subroutine should also handle an empty parameter list. In the example above, it returns `undef`, which is ok.
 
 **Note:** lexical (my) variables can be used in any block, they are not special to subroutines. If there is no enclosing block, it will be private to the source file.
 
@@ -469,7 +469,7 @@ sub marine {
 
 Perl v5.20 added **subroutine signatures** as an experimental feature. See perlsub.
 
-## Input and Output
+## Ch 5. Input and Output
 
 **Input from Standard input**
 
@@ -497,7 +497,7 @@ foreach (<STDIN>) {
 
 **Input from the Diamond operator <>**
 
-For a perl program that can be used like utilities cat, sed, awk, sort, grep, etc. Standard unit tools process files given to them as command line arguments one after another. If nothing is given, or if `-` is used instead of a file name, it reads from standard input. This is what the `<>` does: it reads from the files given as arguments, one line after another, in one big input.
+For a perl program that can be used like utilities cat, sed, awk, sort, grep, etc. Standard unix tools process files given to them as command line arguments one after another. If nothing is given, or if `-` is used instead of a file name, it reads from standard input. This is what the `<>` does: it reads from the files given as arguments, one line after another, in one big input.
 
 ```perl
 while (defined($line = <>)) {
@@ -559,12 +559,12 @@ open CONFIG, '<:encoding(UTF-8)', 'dino';
 open BEDROCK, '>:encoding(UTF-8)', $file_name;
 open LOG, '>>:encoding(UTF-8)', &logfile_name();
  # :utf-8 can be used as a shortcut, but it is not exactly the same thing; it does not
-$ ensure that the data is in utf-8 encoding, it just treats it as such
+ # ensure that the data is in utf-8 encoding, it just treats it as such
 ```
 
 Get all the encodings with this oneliner: `perl -MEncode -le "print for Encode->encodings(':all')"`
 
-Other layer that handles transformation of input/output: ensure that at the end of each line there is a CR-LF - `:>crlf` - newlines (LF) will be transformed to CR-LF; or the other way around `:<crlf` to read a DOS line-endings file - CR-LF will be translated by Perl to LF when reading the file.
+Other layer that handles transformation of input/output: ensure that at the end of each line there is a CR-LF - `>:crlf` - newlines (LF) will be transformed to CR-LF; or the other way around `<:crlf` to read a DOS line-endings file - CR-LF will be translated by Perl to LF when reading the file.
 
 You can modify layers at anytime by **binmoding** a filehandle.
 
@@ -575,7 +575,8 @@ binmode STDOUT, ':encoding(UTF-8)'; # STDOUT has to know how to handle utf-8
 binmode STDIN, ':encoding(UTF-8)';
 ```
 
-Reading from a **bad filehandle** (file not opened properly or closed network connection), gives an end-of-file. Writing will just silently discard the data.  
+Reading from a **bad filehandle** (file not opened properly or closed network connection), gives an end-of-file. Writing will just silently discard the data.
+
 `open` returns true for success, false for failure.
 
 To **close** a filehandle: `close BEDROCK`. It will flush output buffers and release any file locks.  
@@ -583,7 +584,9 @@ Perl automatically closes a filehandle if it is reused in another open (or if th
 
 ----
 
-Fatal errors with **die function** : the `die` function prints the message to STDERR and terminates the program with a nonzeor exit status. The errno associated string from a system or library call (like `perror) is available in `$!`. If the message has a newline, the file name and line number won't be reported.
+Fatal errors with **die function** : the `die` function prints the message to STDERR and terminates the program with a nonzero exit status. The errno associated string from a system or library call (like `perror`) is available in `$!`.
+
+If the message given to `die` has a newline, the file name and line number won't be reported (otherwise, they will).
 
 ```perl
 if ( ! open LOG, '>>', 'logfile' ) {
@@ -632,7 +635,7 @@ select STDOUT;
 print LOG "This gets written to the LOG at once!\n";
 ```
 
-To standard messages to file, the standard filehandles can be re-opened. Perl will not close the standard ones until it makes sure that it can open the file.
+To redirect standard messaging to files, the standard filehandles can be re-opened. Perl will not close the standard ones until it makes sure that it can open the file.
 
 ```perl
  # Send errors to my private error log
@@ -643,7 +646,7 @@ if ( ! open STDERR, ">>/home/barney/.error_log") {
 
 **Filehandles in a Scalar** (since v5.6)
 
-If you use a scalar variable without a value instead of a bareword in open, the filehandle is put in that variable. Some prefer to put a *_fh* at the of the names of these variables. 
+If you use a scalar variable without a value instead of a bareword in `open`, the filehandle is put in that variable. Some prefer to put a *_fh* at the end of such variables' names.
 
 ```perl
 my $rocks_fh;
@@ -659,10 +662,10 @@ while( <$rocks_fh> ) {
 }
 ```
 
-Note that for print it is important to not put a comma after the filehandle, bareword or scalar variable; otherwise, perl will interpret the scalar variable as part of the items to print and it will print a stringification of that; for bareword, perl knows that it is a filehandle (if you just give print a bareword, it will print the content of `$_`).
+Note that for `print` it is important to not put a comma after the filehandle, bareword or scalar variable; otherwise, perl will interpret the scalar variable as part of the items to print and it will print a stringification of that; for bareword, perl knows that it is a filehandle (if you just give print a bareword, it will print the content of `$_`).
 
 ```perl
-print STDOUT;
+print STDOUT;     # prints $_ to stdout
 print $rocks_fh;  # WRONG, probably
 ```
 

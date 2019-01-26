@@ -4,32 +4,6 @@ use warnings;
 use strict;
 use v5.10;
 
-sub calculate {
-    my $op = shift;
-
-    if (! defined $op) { return; }
-
-    if    ($op eq "+") { &add; }
-    elsif ($op eq "*") { &multiply; }
-    else  { return; }
-}
-
-sub add { 
-    my $n = 0; 
-    foreach (@_) {
-        $n += $_;
-    }
-    $n;
-}
-
-sub multiply { 
-    my $n = 1; 
-    foreach (@_) {
-        $n *= $_;
-    }
-    $n;
-}
-
 sub enumerate {
     my $str = ""; # better than undef, to avoid warning in 'say enumerate();'
     my $first = shift @_;
@@ -69,4 +43,9 @@ say enumerate('one');
 say enumerate('one', 'two');
 
 say enumerate();
+
+say separate(@words);
+say separate();
+
+say &enumerate(@ARGV);
 

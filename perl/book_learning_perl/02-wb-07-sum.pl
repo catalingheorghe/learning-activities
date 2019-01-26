@@ -3,7 +3,7 @@
 use warnings;
 use v5.10;
 
-say "Provide the number that will be added:";
+say "Provide the numbers that will be added:";
 while ($line = <STDIN>) {
 	$sum += $line;
 }

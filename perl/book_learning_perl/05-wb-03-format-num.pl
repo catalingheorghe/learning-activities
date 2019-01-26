@@ -11,5 +11,6 @@ sub format_number {
 
     #print $_;
     # the above will print the number an then return 1 from the subroutine
+
     $_;
 }
