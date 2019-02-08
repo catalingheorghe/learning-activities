@@ -111,5 +111,59 @@ Resources - file system layout
 
 ### Manipulating files and directories
 
+Why use the CLI for things like this? Because doing complicated things is not that easy in the GUI. Example: copy all html files from a directory to another, but only files that do not exist or are newer than the versions in the desitnation directory: `cp -u *.html destination`.
+
+The shell makes this possible by using **wildcards**, special characters that allow specifying group of filenames. Also known as *globbing*.
+
+ - `*` - any characters, `?` - single character
+ - `[characters]` - any character that is a member of the set, `[!characters]` - negate
+ - `[[:class:]]` - class of characters
+    - class: alnum, alpha, digit, lower, upper
+
+Ex: `*[[:lower]123]` - any file ending with a lower case letter or 1, 2, 3 numerals
+
+Note: traditional Unix style character ranges like `[A-Z]` or `[a-z]` can still work, but recommendation is to use the character classes.
+
+Note: wildcards also work in some GUI file managers, like the Nautilus file manager.
+
+**<cmd: mkdir; cp; mv; rm; ln >**
+
+ - `mkdir dir1` - create directory, or multiple directories (`mkdir dir1 dir2 ...`)
+    - `mkdir -p dirpath` - create directory, including parent directories
+ - `cp item1 item2` - copy file or directory item1 to the file or directory item2
+ - `cp item... dir` - copy multiple files or directories into dir
+    - `-a / --archive` - maintain all attributes, including ownership, permissions; usually, the copies take the default attributes of the user
+    - `-i / --interactive` - prompt when overwriting; default, NO
+    - `-r / --recursive` - recursively copy directories and their contents
+        - `cp -r dir1 dir2` - if dir2 does not exist, it will be created and the contents from dir1 copied there; if it does exist, the directory dir1 and its contents will be copied there
+    - `-u / --update` - when copying files from one directory to another, only update the destination directory (newer files or non-existent files)
+    - `-v / --verbose`
+ - `mv item1 item2` - move or rename item1 to item2
+    - `-i, -u, -v` - like for `cp`
+ - `rm item...` - remove files or directories
+    - `-i` - prompt before deleting a file
+    - `-r, -v`
+    - `-f / --force` - ignore nonexistent files and do not prompt
+ - `ln file link` -  create a hard link
+ - `ln -s item link` - create a symbolic link
+
+Note: Try to use `cp -i` as often as possible. Avoid accidentally replacing a file.
+
+Note: when using `rm` with wildcards, test if first with `ls`!
+
+*Hard links* are the original links of the Unix world. They represent an additional directory entry for a file. By default every file has a single hard link. A hard link can only reference a file in the same file system and it can not reference a directory. A hard link is exactly like the file its-self. When it is deleted, link is deleted, but the file contents remains until there are no more hard links. Hard links reference the same inode, the same data blocks from the disk. To display inode information use `ls -li`.
+
+*Symbolic links* overcome both limitations of hard links. They create a special file type that contains a text pointer to the referenced file or directory. They are indistinguishable, but if the file is deleted the link remains, broken.
+
+Keep in mind that a symbolic link is an actual text reference containing a path to the target item. It can be an absolute path or a relative path, relative to the link's location. Relative paths is more desirable - it allows moving or renaming a directory tree.
+
+Most operations on symbolic links are done on the target file; `rm` is an exception, it will remove the link.
+
+NOTE: in Nautilus, CTRL+SHIFT when dragging a file creates a link.
+
+### Working with commands
+
+
+
 
 
