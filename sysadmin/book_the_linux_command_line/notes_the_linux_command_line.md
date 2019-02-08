@@ -103,10 +103,13 @@ The design of the Unix file system tree layout is published in *Linus Filesystem
  - `/var` - place to store data that is likely to change (database files, user email, spool files etc)
  - `/var/log` - log files (ex: /var/log/messages or /var/log/syslog)
 
-Resources
+Resources - file system layout
 
  - http://www.pathname.com/fhs/
  - https://wiki.debian.org/FilesystemHierarchyStandard
+ - [wikipedia](https://en.wikipedia.org/wiki/Unix_filesystem#Conventional_directory_layout)
+
+### Manipulating files and directories
 
 
 
