@@ -398,4 +398,258 @@ Using `Ctrl-r` you can do a reverse incremental search. We can execute the found
 
  - `script [file]` - can record a shell session to a file; it includes everything on the terminal. See the man for options and features, including a cool example with a named pipe, `mkfifo + script + cat`.
 
+### Permisssions
+
+**Users** in Unix are split up into owners, group members and the world.
+
+Each user has a number, *user id - uid*, which is mapped to a human readable name. Also, each user has assigned a *primary group ID - gid* and may belong to several groups.
+
+Different distributions manage things differently regarding permissions. Fedora start with regular user ids at 500, while Ubuntu at 1000. In ubuntu, a user is assigned to more groups in order to manage permissions for different services.
+
+The files used to manage this are: `/etc/passwd` - user (login) name, uid, gid, account name, home dir, login shell; `/etc/groups`; `/etc/shadow` - holds the passwords for users.
+
+Traditional Unix style systems assign regular user to a *users* group, while modern Linux distribution create a unique, single member group with the same name as the user. Makes permission management easier.
+
+**<cmd: id;>**
+
+ - `id [username]` - display information about a user, or about current user (name, uid, gid, groups)
+
+Access to a file is defined in the terms of **read, write and execute**. These permissions are stored in *file attributes*, which are shown first in the `ls -l` output.
+
+First character denotes the file type
+
+ - `-` - regular file
+ - `l` - symlink (for symlinks the rest is rwxrwxrwx, dummy; real attributes are those of the target file)
+ - `c` - character device file
+ - `b` - block device file
+ - `s` - local socket file
+ - `p` - name pipe
+ - `d` - directory
+ 
+The remaining nine characters, the *file mode*, are the read write execute permissions for owner, file's group and everybody else. Read, write, execute have different meanings for files and directories.
+
+ - read
+    - file: can be opened and read
+    - directory: content can be listed if the execute attribute is also set
+ - write
+    - file: can be written or truncated (but the ability to delete or rename files is controlled by directory permissions)
+    - directory: files within can be created, deleted, renamed if the execute bit is also set
+ - execute
+    - file: can be treated as a program and executed
+    - directory: allows a directory to be entered
+
+**<cmd: chmod; umask;>**
+
+In order to change the file mode, the command to use is `chmod`. Only the file owner or the superuser can do this. It can be done via octal representation (one octal digits - 3 bits - rwx), or via symbolic representation (who - u user owner, g group owner, o other word, a all; operation - `+`, `-` or `=`; what - r, w, x).
+
+ - `chmod 600 ls-output.txt` - rw only for owner
+ - `chmod u+x,go=rx` - add x to owner, group and other are set to rx
+
+Note that the `--recursive` option for chmod acts on both files and directories, so it may not be the best thing to use, as you don't usually want files and directories to have the same permissions.
+
+Default permissions given to a file are controlled by `umask`. It manipulates a mask of bits, in octal notation, that are removed when creating a file. The default umask is usually `0002`, which means it will remove the w permission from others. Note that the executable permission is not given by default.
+
+ - `umask 0022` - change the umask so that w is removed from group and others; persistent in current session
+
+The fact that a permission mask is actually a 4 digit expression is because there are other special permission settings besides read, write, execute.
+
+The first of these is *setuid* (4000), which has the effect that when executing a program the *effective user id* is changed from the user running the program to the user that is the owner of the file. This means that for a *setuid root* program, normal users can execute it and benefit from superuser privileges. 
+
+The second, less used setting, is *setgid* (2000), which changes the effective group id. When set on a directory, files created will be given the group ownership of the directory, not the primary group of the user creating the file - useful in a shared directory where members of a common group need access to all files and directories, no matter their primary groups.
+
+The third is called the *sticky bit* (1000) - holdover from traditional Unix *not swappable*. On files, Linux ignores it. On a directory, it prevents user from deleting or renaming files unless the user is the owner of the directory, the owner of the file or the superuser. This is often used for directories like `/tmp`.
+
+ - `u+s / g+s` - set setuid / setgid bit; in `ls` output there is an `s` for executable
+ - `chmod +t dir` - set sticky bit; `t` for other - executable
+
+There are several ways to **change identities**, aka assume other users' identities: logout and log back in, use `su`, use `sudo`.
+
+**<cmd: su; sudo;>**
+
+The `su` command start a shell as another user. With `-l`, a *login shell* is started, which loads the user's environment and changes to his home directory - this is usually what we want. If no username is specified, superuser is assumed.
+
+ - `su -l username` - start a login shell as user usernam
+ - `su -` - start a login shell as root (-l can be shortened to -)
+ - `su` - start a shell as root
+ - `su -c 'command'` - execute a single command in a new root shell; quoting is important to avoid expansion in our shell!
+
+The prompt indicates superuser privileges by `#`.
+
+The `sudo` command is designed for executing a command as another user. It can be configured by the administrator to allow a user to execute commands as a different user (usually root). A user may be restricted to one or more commands. 
+
+`sudo` does not require access to the superuser's password, it requires the user's own password - the permission has already been configured by the administrator (`/etc/sudoers`), so no need to know the superuser password.
+
+Also, `sudo` does not start a new shell, so commands do not need quoting. This can be changed by various options.
+
+ - `sudo command`
+ - `sudo -i` - start an interactive root shell, like `su -`
+ - `sudo -l` - list what commands can current user execute
+
+Note: on Ubuntu, the root account is by defaul disabled (it has no password set), so you cannot use `su`. The reason was that users tended to do everything as root. Ubuntu grants the initial user account superuser privileges via `sudo`.
+
+The owner and group owner of a file can be changed, with superuser privileges, using `chown`.
+
+**<cmd: chown; chgrp;>**
+
+ - `chown [owner][:[group]] file...`
+ - `bob` - change file owner to bob
+ - `bob:users` - file owner: user bob, file group owner: group users
+ - `:admins` - change file group owner to admin
+ - `bob:` - file owner to bob and file group owner to bob's login group
+
+In older versions of Unix, `chown` only changed file ownership, so another command was required for changing file group ownership: `chgrp`. It works in a similar way, but is more limited.
+
+----
+
+Example: setting up a shared folder for music between multiple users on the system
+
+ - create group *music*
+ - add users to group
+ - create directory in /usr/local/share/music (with sudo)
+ - `chown :music /usr/local/share/music` - change group owner of directory
+ - set *setgid* bit on the directory so that files created by users get the group of the directory
+ - make sure umask of users is ok so that files and directories created by them have the proper permissions - accessible by group owner (especially for directories - permission to write into directories owned by other users, but with same group owner)
+    - set umask of users to 0002 (we will see how to make this persistent)
+
+----
+
+To **change your password**, use the `passwd` command. It can change your own password, or the one for other users, if you have superuser privileges.
+
+**<cmd: passwd;>**
+
+ - `passwd [user]` - will be prompted for old and new password
+
+The superuser can do other things with passwd: account locking, password expiration and so on (see man page).
+
+To **maintain users and groups** the commands to look into are: `adduser`, `useradd`, `usermod`, `groupadd`.
+
+### Processes
+
+At system startup the kernel initiates a few of its own activities as processes and start *init*, PID 1, that reads *init script* from /etc and initializes various services as *daemon programs*. The kernel keeps tracks of the processes - PIDs, user id, memory, state etc.
+
+The most common way to **view processes** is using the `ps` command. By default it only shows the processes associated with the current terminal session. "TTY" is short for *teletype* and shows the *controlling terminal* of the process. "Time" shows the CPU time used by the process.
+
+To see all the processes that we own, no matter the controlling terminal, add "x" as an option to ps. A "?" for TTY means that the process has no controlling terminal. The column STAT shown the state of the process.
+
+STAT column
+
+ - R - running or ready to run
+ - S - sleeping; waiting for an event
+ - D - uninterruptible sleep. Waiting for I/O such as a disk drive
+ - T - stopped
+ - Z - defunct, zombie process; not cleaned up by its parent
+ - < - high priority process; related to *niceness* - not as nice
+ - N - a *nice* process, marked as lower priority
+
+Another common format of ps options is `ps aux`, which shows even more information. It displays processes belonging to every user. Without leading dash for options, Linux ps emulates the BSD version style. Additional information is
+
+ - USER - owner of the process
+ - %CPU - CPU usage in percentage
+ - %MEM - memory usage in percentage
+ - VSZ - virtual memory size
+ - RSS - resident set size - amount of physical memory (RAM) used, in kilobytes
+ - START - time when process started
+
+**<cmd: ps; top;>**
+
+ - `ps` - processes from current terminal session
+ - `ps x` - all processes that the current user owns
+ - `ps aux` - processes belonging to every user, with extra info
+
+For a dynamic view of the processes, `top` can be used. Top contains two parts, one with system information and one with a list of processes ordered by CPU activity.
+
+From the system summary part:
+
+ - time of day, uptime, number of users logged in, load average (the number of processes that are in runnable state and waiting for the CPU; average for last 60 seconds, 5 minutes, 15 minutes; under 1.0 means system is not busy)
+ - tasks: summary of number of processes and states
+ - percent of CPU(s)
+    - % us - percent of CPU for user space processes (outside of kernel)
+    - % sy - for system (kernel) processes
+    - % ni - used by nice processes
+    - % id - percent idle
+    - % wa - percent of CPU waiting for I/0
+ - details how physical RAM is used
+ - details how swap space (virtual memory) is used
+
+Top program accepts a number of keyboard options. For help, `h`; to quit `q`.
+
+There are several ways to **control processes** from the shell.
+
+To interrupt a running process, `Ctrl-c` politely asks the program to terminate. Most programs do that.
+
+If we want to run a program but immediately get our shell prompt back, even if the program is running, it can be started in the *background* (as opposed ot the *foreground* where stuff visible to the surface are, like the shell prompt).
+
+A program running in the background does not receive keyboard input, so is also immune to Ctrl-c for example. A process can be returned to the foreground with `fg`. 
+
+A foreground process can be stopped/paused with `Ctrl-z`. We can continue its execution in the foreground or resume it in the background with `bg`.
+
+**<cmd: &; jobs; fg; bg; Ctrl-c; Ctrl-z;>**
+
+ - `cmd &` - execute in background; the output printed contains the job number and the PID of the process
+ - `jobs` - see processes launched from our terminal (job control facility of the shell)
+ - `fg %1` - %1 is a *jobspec*, the number of the job; optional if only 1
+ - `bg %1` - resume a stopped program in the background
+
+A process can be killed by sending it a **signal**. This is what the kill command does. Ctrl-c sends an INT (interrupt) signal, while Ctrl-z send a TSTP (terminal stop) signal. Programs listen to signal and react to them. This allows, for example to save work and terminate when receiving a kill or a Ctrl-c.
+
+**<cmd: kill; killall;>**
+
+ - `kill PID` - kill process (send it TERM signal)
+ - `kill -signalnumber PID`
+    - 1 - HUP - hangup; indicate that the controlling terminal has "hung-up" (from vintage days of modems and remote terminals); closing a terminal session triggers this, the foreground program will be sent this signal and will terminate. Also used by many daemons to reinitialize - restart and reread its configuration
+    - 2 - INT - interrupt; usually terminates the process
+    - 9 - KILL - kill; special signal, cannot be handled; kernel terminates the target process without process knowing about it
+    - 15 - TERM - terminate; usually terminates the process; default signal for kill command
+    - 18 - CONT - continue; restore a process after a STOP or TSTP signal; sent by bg and fg commands
+    - 19 - STOP - stop; pause without terminating, like KILL it is not sent to the target process so it cannot be ignored
+    - 20 - TSTP - terminal stop; sent by Ctrl-z, received by the process who should pause
+    - 3 - QUIT
+    - 11 - SEGV - segmentation violation; sent if a program makes illegal use of memory
+    - 28 - WINCH - window change; sent by the system if the window changes size (program can redraw its-self, like top and less do)
+ - `kill -l` - list of signals
+ - `killall xlogo` - send TERM to all matching processes - all xlogo processes
+
+You must be the owner of a process, or the superuser, to send it a signal with kill.
+
+**Shutting down the system** means terminating all processes in a control fashion and giving the system chance to do some housekeeping.
+
+The shutdown command can halt, poweroff or reboot and it can also handle a time delay. Once the shutdown command is executed a message is broadcasted to all logged-in users.
+
+ - `halt`
+ - `poweroff`
+ - `reboot`
+ - `shutdown`
+    - `shutdown -h now` - poweroff the system now
+    - `shutdown -r +4 Bye!` - reboot the system in 4 minutes and send the wall message to all users "Bye!"
+    - `shutdown -c` - cancel a running shutdown
+
+Other process related commands
+
+ - `pstree`
+ - `vmstat` - snapshot of system resource usage, including memory, swap, disk I/O
+    - `vmstat 5` - continuous display, 5 seconds update interval
+ - `xload` - graphical program - system load over time
+ - `tload` - like xload, but in the terminal
+
+## 2. Configuration and the environment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
