@@ -874,7 +874,7 @@ There are usually two types of tools
 
 **Common tasks**
 
-**<cmd: apt; yum;>**
+**<cmd: dpkg; apt-get; apt-cache; rpm; yum;>**
 
  - finding a package
     - `apt-get update; apt-cache search search_string`
