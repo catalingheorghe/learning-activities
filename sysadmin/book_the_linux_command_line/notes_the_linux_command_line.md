@@ -635,16 +635,167 @@ Other process related commands
 
 ## 2. Configuration and the environment
 
+### Environment
 
+The shell stores *shell variables* and *environment variables* in the environment. With bash, they are very similar. Shell variables consists of data placed there by bash, env variables are all the rest. The shell also stores *aliases* and *shell functions*.
 
+**<cmd: printenv; set; alias;>**
 
+ - `printenv | less` - list environment variables
+	- `printenv USER` - list value for variable USER
+ - `set | less` - list env variables, shell variables and shell functions (sorted alphabetically)
+ - `echo $HOME` - list content of a variable
+ - `alias` - list aliases
 
+Some interesting env variables are: DISPLAY (name of X server display), EDITOR, SHELL, HOME, OLDPWD, LANG, PAGER, PATH, PS1 (prompt string 1), TERM (terminal emulator protocol), TZ (timezone), USER. Depending on distribution, some may not be set - that is not an issue.
 
+The **environment is established** by reading a series of configuration scripts, *startup file*. First, default env for all users, followed by startup files in the user's home directory. The exact sequence depends on the type of shell session.
 
+Types of shell sessions
 
+ - login shell session - one in which we are prompted for our username and password (eg: virtual console)
+	- `/etc/profile` - global for all users
+	- `~/.bash_profile` - user's personal startup file
+	- `~/.bash_login` - if `~/.bash_profile` not found, bash tries to read this
+	- `~/.profile` - if neither of the previous two found, bash tries this; default in Debian based distros, like Ubuntu
+ - non-login shell session - typically when a terminal session is started from the GUI
+	- `/etc/bash.bashrc` - global
+	- `~/.bashrc` - per user
+		- note that most startup files for login shells are written in such a way as to read this as well
 
+Note: in addition to reading the startup files, non login shells inherit the environment from their parent process (usually a login shell).
 
+PATH (the list of locations where the shell looks to find commands) is usually set by /etc/profile and extended by local .profile startup file, for example by adding `$HOME/bin` to it. This means that if you create a bin directory (log back in) and add your own executables there, the shell will find them. The PATH is `export`-ed, so that the contents is available to child processes.
 
+To **modify the environment**, a rule of thumb is to place PATH modifications and definitions of additional env variables in the `.bash_profile` startup file, or similar. For everything else, use `.bashrc`. Of course, to affect all users, the global files must be modified.
+
+Text editors can be GUI or text. GUI: gedit (GNOME), kedit, kwrite, kate (KDE). Text: nano, vi (replaced on most distros by vim - vi improved), emacs (gigantic, all-purpose, does-everything programming environment).
+
+**<cmd: nano;>**
+
+nano was designed as a small text editor for an email client, so it does not have many fancy features, but it is easy to use. At the bottom it shows a menu with commands in which the `^X` notation means `Ctrl-x`.
+
+ - Ctrl-x - exit
+ - Ctrl-o - save, write out
+
+Example of possible additions to .bashrc
+
+```
+    # Change umask to make directory sharing easier
+    umask 0002
+
+    # Ignore duplicates in command history and increase
+    # history size to 1000 lines
+    export HISTCONTROL=ignoredups
+    export HISTSIZE=1000
+
+    # Add some helpful aliases
+    alias l.='ls -d .* --color=auto'
+    alias ll='ls -l --color=auto'
+```
+
+To take effect, either start a new terminal session, or instruct bash to reread the modifications by `source ~/.bashrc`.
+
+*Resources*
+
+ - INVOCATION section of `bash` man page - full details of bash startup files
+
+### Vi intro
+
+POSIX (standard required for program compatibility on Unix systems) requires that vi ("vee eye") be present.
+
+History: first version written by Bill Joy (co-founder of Sun Microsystems). Stands for visual editor; video terminals were just appearing, rather than printer-based terminals like teletypes. It allows editing with a moving cursor. Before there were line editors, which operated on a single specific line. vi still incorporates a line editor, called ex.
+
+Most distributions ship with `vim` - vi improved. It is symbolically linked to vi.
+
+Note: compatibility mode make vim closer to vi. We don't want that. If you see this, `set nocp` in your `~/.vimrc` file.
+
+Vi is a *modal editor*, it acts depending upon which mode it's in. When first started it is in *command mode*, so almost every key will actually be a command.
+
+To enter in *insert mode* press `i`. ESC will exit insert mode, back into command mode. To save our work we must enter an *ex* command - press `:` then `w` for writing and ENTER.
+
+Note: in the Vim documentation, command mode is called *normal mode* and ex commands are called *command mode*.
+
+Moving the cursor
+
+ - h j k l - left, down, up, right
+ - 0 (zero) - beginning of current line
+ - ^ - first non-whitespace char of current line
+ - $ - end of line
+ - w - beginning of next word or punctuation
+ - W - beginning of next word (ignores punctuation)
+ - b - prev word or punctuation
+ - B - prev word
+ - Ctrl-f - page down
+ - Ctrl-b - page up
+ - numberG - go to line number; eg: 1G - start of file
+ - G - last line
+
+Many commands can be prefixed with a number. Example: 5h will move the cursor 5 positions to the left.
+
+ - `a` - append, insert mode
+ - `A` - move to end of line and append
+ - `o` - open a new line below
+ - `O` - open a new line above
+ - `u` - undo last change
+
+Deleting
+
+ - `x`, `3x` - current character, current character plus next two
+ - `dd` - current line
+ - `5dd` - current line plus next four
+ - `dW` - until beginning of next work
+ - `d$` - until end of line
+ - `d0` - until beginning of line
+ - `d^` - until first non-whitespace char
+ - `dG` - from current line to end of file
+ - `d20G` - from current line to the 20th line
+
+Cut, copy, paster
+
+ - `d` also cuts the text - it puts it into a paste buffer. We can paste that content with `p` after the cursor, or with `P` before the cursor.
+ - to copy the text, `y` is used (yank), much like `d`.
+
+Join lines
+
+ - J - joins current line with the next
+
+Search
+
+ - `f` searches within a line; eg: `fa` - moves to the next cursor of "a"
+    - ';' will repeat the search
+ - '/' searches within the entire file; similar to less (but also works with regular expressions)
+    - 'n' to move to next match, `N' to the previous
+    - `:set [no]ignorecase'
+
+Search and replace (*substitution*)
+
+ - `:%s/line/Line/g`
+    - `:` - starts an `ex` command
+    - `%` - range of lines affected; this means entire file, or `1,$`, but could also be only the first 3 lines (`1,3`)
+    - `s` - the operation of substitution
+    - `/line/Line/` - the search pattern and the replacement text
+    - `g` - global, aka on every instance of the search string in the line, otherwise, only the first match in a line is considered
+        - `gc` - ask for user confirmation
+
+Editing multiple files
+
+ - `vi file1 file2...` - open multiple files
+ - `:bn` `:bp` - next, previous file
+ - `:buffers`, `:buffer 1`
+ - `:e filepath` - open an additional file (edit)
+ - `:close 1` - close buffer
+
+You can insert the content of an entire file into another.
+
+ - `:r file` - it will copy the file content below the cursor position
+
+Saving
+
+ - `:w`
+    - `:w filename.txt` - like a save as, but continues to edit current file
+    - `:wq` - save an quit
+ - `ZZ` - save the current file and exit (like `:wq`)
 
 
 
