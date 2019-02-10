@@ -851,7 +851,70 @@ Note: much more can be done with prompts, including shell functions and scripts.
 
  - [The Linux Documentation Project - BASH prompt HOWTO](http://tldp.org/HOWTO/Bash-Prompt-HOWTO/)
 
-## 3. Common tasks and essential tools
+## 3. Common Tasks and Essential Tools
+
+### Package Management
+
+The most important thing about a distribution is the *packaging system* and the vitality of the distribution's support community. The software landscape in Linux is very dynamic, there are regular updates, even daily for some packages.
+
+Package management is a method of installing and maintaining software. There is not much need anymore to compile programs from source. Not that it is not useful, but using a package management system is faster and easier to deal with.
+
+The two big camps of packaging systems are `.deb` (Debian) and `.rpm` (Red Hat).
+
+The basic unit in a packaging system is the **package file**. It is a compressed collection of files that form the software package - programs, data files, metadata, pre and post installation scripts that perform configuration before and after the installation. They are created by a *package maintainer* - gets the software in source code from *upstream* (from the author), compiles it and creates the package metadata and any necessary installation scripts. Can apply modifications to the source code to improve the fit with the other parts of the Linux distribution.
+
+Packages for a distribution are made available in central **repositories**. A distribution may maintain different repositories for different stages of development - "testing", "development", "stable" etc. A distribution may also have related third-party repositories - often needed to supply software that cannot be bundled in with the distribution, for legal reasons (patents, DRM). These repos are usually wholly independent of the distribution they support; the user must know about them and manually include them in the configuration files of the package management system.
+
+Programs usually rely on other software to function - like routines in *shared libraries*. If a package requires a shared resource, it has a **dependency**. Package management systems provide some form of *dependency resolution* to ensure that when a package is installed, what is needed is also installed.
+
+There are usually two types of tools
+
+ - low-level tools - tasks such as installing and removing package files (dpkg / rpm)
+ - high-level tools - metadata searching and dependency resolution (apt, apt-get, aptitude / yum, dnf)
+
+**Common tasks**
+
+**<cmd: apt; yum;>**
+
+ - finding a package
+    - `apt-get update; apt-cache search search_string`
+    - `yum search search_string`
+ - install a package with full dependency resolution
+    - `apt-get update; apt-get install package_name`
+    - `yum install package_name`
+ - install a package from a package file
+    - `dpkg -i package_file`
+    - `rpm -i package_file`
+ - remove a package
+    - `apt-get remove package_name`
+    - `yum erase package_name`
+ - updating packages from a repository
+    - `apt-get update; apt-get upgrade`
+    - `yum update`
+ - upgrading a package from a package file (replacing the current one)
+    - `dpkg -i package_file`
+    - `rpm -U package_file`
+ - list installed packages
+    - `dpkg -l`
+    - `rpm -qa`
+ - determine whether a package is installed
+    - `dpkg -s package_name`
+    - `rmp -q package_name`
+ - display info about an install packages
+    - `apt-cache show package_name`
+    - `yum info package_name`
+ - find which package installed a file
+    - `dpkg -S file_name`
+    - `rpm -qf file_name`
+
+*Resources*
+
+ - [debian FAQ package management system](https://www.debian.org/doc/manuals/debian-faq/ch-pkgtools.en.html)
+
+
+
+
+
 
 
 
