@@ -5,12 +5,14 @@ William Shots
 ## Table of Contents
 
 0. About
+1. Shell notes and Linux intro
+2. Configuration and the environment
 
 ## 0. About
 
-Website (link)[http://linuxcommand.org/tlcl.php] - Creative Commons license, free for download
+Website [link](http://linuxcommand.org/tlcl.php) - Creative Commons license, free for download
 
-## 1. Shell notes
+## 1. Shell notes and Linux intro
 
 ### Basic
 
@@ -77,13 +79,13 @@ If your terminal is scrambled, for example by displaying a binary file, use `res
 
 **File system layout**
 
-The design of the Unix file system tree layout is published in *Linus Filesystem Hierarchy Standard*. Linux follows this, but it is not an enforced, it varies from distribution to distribution.
+The design of the Unix file system tree layout is published in *Linus Filesystem Hierarchy Standard*. Linux follows this, but it is not enforced, it varies from distribution to distribution.
 
  - `/`
  - `/bin` - binaries needed for system to boot and run
  - `/boot` - linux kernel, initial ram disk, bootloader (usually grub)
  - `/dev` - device nodes
- - `/etc` - configration files plus init scripts; it should be all text in here
+ - `/etc` - configuration files plus init scripts; it should be all text in here
  - `/home` - place for users' home directory
  - `/lib` - libraries used by system programs
  - `/lost+found` - used by linux file systems (like ext4) for partial recovery; if not empty, something bad happened
@@ -92,7 +94,7 @@ The design of the Unix file system tree layout is published in *Linus Filesystem
  - `/opt` - usually place to install optional and/or commerical software
  - `/proc` - virtual filesystem as an API to the kernel
  - `/root` - home of root directory
- - `/sbin` - "system" binaries; generaly vital things, reserved to the superuser
+ - `/sbin` - "system" binaries; generaly vital things, reserved for the superuser
  - `/tmp` - storage of temporary files
  - `/usr` - largest directory tree; usually programs and support files used by regular users
  - `/usr/bin` - executable programs installed by the Linux distribution - thousands of them
