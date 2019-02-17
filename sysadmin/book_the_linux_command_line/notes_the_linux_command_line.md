@@ -13,6 +13,8 @@ William Shots
 
 Website [link](http://linuxcommand.org/tlcl.php) - Creative Commons license, free for download
 
+*Version: 19.01 - Fifth Internet Edition*
+
 ## 1. Shell notes and Linux intro
 
 ### Basic
@@ -281,7 +283,7 @@ Wildcards work by *pathname expansion*. What the shell expands to and then match
 
 *Tilde expansion* refers to home directories.
 
- - `echo ~` , `echo ~user~` - path of home directory of current user, or of named user
+ - `echo ~` , `echo ~user` - path of home directory of current user, or of named user
 
 *Arithmetic expansion* - `$((expression))` - can also be used. It works for only for integers but has support for the usual operators, inluding `%` and `**` - exponentiation.
 
@@ -314,7 +316,7 @@ The most common application is to make list of files or directories to be create
 
 The following examples do not produce the expected result.
 
- - `echo this is a    test` - *word-splitting* by the shell removes extra whitespaces
+ - `echo this is a  [spaces]  test` - *word-splitting* by the shell removes extra whitespaces
  - `echo total is $100.00`  - the variable $1 will be expanded to the empty string
 
 Quoting can selectively suppress expansion. It does this by using double quotes or single quotes.
@@ -395,7 +397,7 @@ Using `Ctrl-r` you can do a reverse incremental search. We can execute the found
  - Ctrl-r - incremental reverse search
  - Alt-p - non incremental reverse search
  - Alt-n - non incremental forward search
- - Ctr-o - execute current history item and move to next, then cycle - useful with Ctrl-o and then to execute a series of commands
+ - Ctrl-o - execute current history item and move to next, then cycle
 
 **<cmd: script;>**
 
@@ -911,11 +913,142 @@ There are usually two types of tools
 
  - [debian FAQ package management system](https://www.debian.org/doc/manuals/debian-faq/ch-pkgtools.en.html)
 
+### Storage Media
+
+The process of attaching a storage device to the file system tree is called *mounting*.
+
+File `/etc/fstab` lists the devices that will be mounted at boot time. Fields:
+
+ - 1 - device - name of device, but with hot pluggable devices, better to use a label (added to the storage media when it is formatted). Either a simple text label or a randomly generated UUID.
+ - 2 - mount point - directory where it is attached to the file system tree
+ - 3 - file system type - native Linux usually Fourth Extended File System (ext4)
+ - 4 - mount options - ex: read-only, or non-executable
+ - 5 - frequency - if and when a file system is to be backed up with the `dump` command
+ - 6 - order - what order file systems should be checks with the `fsck` command
+
+**<cmd: mount; umount;>**
+
+View list of the file systems currently mounted - `mount`. Format: *device on mount-point type file-system-type (optons)*.
+
+CD-ROM type: iso9660. Note that audio CDs are not like CD-ROMs, they do not have file systems to be mounted in the usual sense.
+
+A device can be unmounted with `unmount dev_name`. To mount it somewhere else, first you should create that new *mount point*, simply a directory. Note that the directory can be non-empty, in which case its contents won't be visible while the new file system is mounted there.
+
+To mount at the new mount point, the mount command is used again.
+
+ - `su -`
+ - `umount /dev/sdc`
+ - `mkdir /mnt/cdrom`
+ - `mount -t iso9660 /dev/sdc /mnt/cdrom`
+
+If the device is in use by someone, or by some process, like changing the working directory there, `umount` will fail with "device is busy".
+
+Note: unmounting is important. Operating systems store data for or from storage devices in memory for as long as possible before actually interacting with the (slower) device. It does this by using *buffers*. It makes writing to storage devices fast, because the OS will actually pile it up in memory and write it to the device at another time. Unmounting entails writing all remaining data to the device (if vital updates, like directory updates are not transferred to the device, *file system corruption* can occur).
+
+*Device names*
+
+All devices live in `/dev/`. Bellow are some naming patters used by Linux:
+
+ - /dev/fd - floppy disk
+ - /dev/hd - IDE (PATA) disks on older systems; hda / hdb - master / slave on first channel; hdc / hdd - second channel; a trailing digit represents the partition on the device
+ - /dev/lp - printers
+ - /dev/sd - SCSI disks; on modern Linux distros, the kernel treats all disk-like devices (PATA/SATA, flash drives, USB mass storage) as SCSI disks
+ - /dev/sr - optical drives
+
+To see the name of a new device use `tail -f` on /var/log/messages or /var/log/syslog. Example: `kernel: [46493.044865] sd 6:0:0:0: [sdb] Attached SCSI removable disk`.
+
+*Partitions and file system utils*
+
+**<cmd: fdisk; mkfs; fsck;>**
+
+Manipulating partitions on a disk-like device can be done with `fdisk`. The device has to be unmonted, then: `sudo fdisk /dev/name`. The entire device must be given, not a partition name.
+
+ - `fdisk /dev/name`
+    - `m` - help / menu
+    - `p` - print partition table of device
+    - `l` - list know partition types (eg: `b` - windows 95 fat32)
+    - `t` - change partition type (eg: `83` - Linux)
+    - `w` - write partition table to disk
+
+To create a new file system on a partition, the `mkfs` tool can be used
+
+ - `sudo mkfs -t ext4 /dev/sdb1` or `-t vfat` for FAT32
+
+*Testing and repairing filesystems*
+
+At startup, Linux checks the filesystems before mounting them; it does this in the order specified in `/etc/fstab`, in the last column. The tool that does this is `fsck`. It can also repair some issues - the recovered portions if files are put in the `lost+found` directory.
+
+ - `sudo fsck /dev/sdb1`
+
+Note: "what the fsck?!" - unix culture, fsck used in place of a popular word
+
+*Moving data directly to and from devices*
+
+**<cmd: dd;>**
+
+Disks can be seen not only as directories and files, but as raw data blocks as well. This gives us the ability, for example, to clone a disk.
+
+The `dd` program does this - copies blocks of data from one place to another.
+
+ - `dd if=input_file of=output_file [bs=block_size count=blocks]]`
+
+Example: two identical drives attached to a computer, to copy all from one to another, or to a local file
+
+ - `dd if=/dev/sdb of=/dev/sdc`
+ - `dd if=/dev/sdb of=flash_drive.img`
+
+*Creating and writing CD-ROM images*
+
+**<cmd: genisoimage; wodim;>**
+
+To make an ISO image on an existing CD-ROM, we can simpy use `dd` like in the above example (from CD-ROM device to local file). (for audio CDs, look at `cdrdao` command)
+
+To create an ISO image with the contents of a directory
+
+ - `genisoimage -o cd-rom.iso -R -J ~/cd-rom-files`
+    - R - metadata for Rock Ridge extension (long filenames and POSIX-style file permissions)
+    - J - Joliet extensions, long filenames for Windows
+
+NOTE: `wodim` and `genisoimage` are a fork with replacement programs for `cdrecord` and `mkisofs`, which went through a partial change of license.
+
+To mount an ISO image while it is still on our hard disk, we use the *loop* option to mount:
+
+ - `mkdir /mnt/iso_image`
+ - `mount -t iso9660 -o loop image.iso /mnt/iso_image`
+
+To write an image on a CD/DVD, the `wodim` program is used
+
+ - `wodim dev=/dev/cdrw blank=fast` - blank a rewritable media
+ - `wodim dev=/dev/cdrw image.iso` - write image
+    - `-v` - verbose
+    - `-dao` - disc-at-once mode; this should be used if preparing a disc for commercial reproduction (default is track-at-once, suitable for recording music tracks)
+
+*Integrity check*
+
+**<cmd: md5sum;>>**
+
+To verify the integrity of an ISO image a checksum is used. Usually, it is an md5 sum.
+
+ - `md5sum image.iso`
+
+This can also be used to verify if we have written an image correctly on the media. For CD-R and CD-RW disks written in disk at once we can simply do a sum over the entire device. Many types of media, such as DVDs, require a calculation of how many 2048-byte blocks does the image span (optical media is always written in 2048-byte blocks).
+
+ - `md5sum dvd-image.iso; dd if=/dev/dvd bs=2048 count=$(( $(stat -c "%s" dvd-image.iso) / 2048 )) | md5sum`
+
+*Resources*
+
+ - [why dd doesn't work on audio CDs](https://www.quora.com/Why-doesnt-the-Linux-DD-command-work-with-audio-CDs)
 
 
 
 
 
+
+
+
+
+
+ 
 
 
 
