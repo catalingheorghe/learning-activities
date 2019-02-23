@@ -1105,19 +1105,158 @@ OpenSSH also includes two programs that can use the encrypted tunnel to copy fil
  - `sftp remote-sys`
     - `ls`
     - `lcd Desktop`
-    - `get ubuntu-xx.iso'
-    - 'bye'
+    - `get ubuntu-xx.iso`
+    - `bye`
 
 SFTP is usually supported by many file-managers. An URI beginning with `sftp://` will allow you to operate files on a remote system.
 
 The most common SSH client for Windows is PuTTY. Also used is MobaXterm.
 
+### Searching for Files
 
+**<cmd: locate;>**
 
+The `locate` program performs a rapid database search of pathnames.
 
+ - `locate bin/zip` - look for a program starting with zip (since it is a program, we assume its path ends with `bin/`)
+ - `locate zip | grep bin` - not sure if it stars with zip
+ - `sudo updatedb`
 
+The locate database is created by another program - `updatedb`, which is usually run as a *cron job*. To update instantly, run it with superuser privileges, as exemplified above.
 
+**<cmd: find;>**
 
+`find` searches a given directory and its subdirecotries for files based on a variety of criteria. In its simplest form, find is given one or more names of directories to search, so it can be used to list files in a directory tree.
+
+ - `find ~` - listing of home directory, usually quite large
+
+To identify files that match a specific criteria, find uses *options*, *tests* and *actions*.
+
+Tests
+
+Searching by file type is a common use-case
+
+ - `find ~ -type d` - the test *-type d* limits the search to directories
+ - `find ~ -type f` - only regular files files
+ - `b` - block special device file; `c` - character dev file; `l` - symlink; `f`; `d`
+
+File size and name can also be a test
+
+ - `find ~ -type f -name "*.JPG" -size +1M` - JPG pictures larger than 1 megabyte
+	- the double quotes are to prevent pathname expansion by the shell
+	- units can be specified in: `b` - 512-byte blocks (default); `c` - bytes; `w` - 2-byte words; `k`; `M`; `G`
+
+Other common tests supported by find
+
+ - `cmin n` - content or attributes last modified exactly n minutes ago (`-n` - less than n minutes ago)
+ - `cnewer file` - content or attributes last modified more recently than those of file
+ - `ctime n` - content or attributes last modified n x 24 hours ago
+ - `empty` - empty files and directories
+ - `group name`
+ - `iname pattern` - case-insensitive
+ - `inum n` - inode number n (can find all hard links to a particular inode)
+ - `mmin n` - content last modified n minutes ago
+ - `mtime n` - content last modified n x 24 hours ago
+ - `name pattern` - wildcard pattern
+ - `newer file` - contents modified more recently than file (useful when writing scripts that perform backups, for example, by modifying a log file when a backup is performed and then only backuping the newer files)
+ - `nouser` - files and directories that do not belong to a valid user
+ - `nogroup` - same, for group
+ - `perm mode` - either octal or symbolic, files or directories with permissions set to mode
+ - `samefile name` - like inum, same inode number as file name
+ - `size n`
+ - `type c`
+ - `user name` - username or user ID
+
+Operators
+
+With so many tests, find also offers a way to express logical relantionships between the tests. For example, determine if all the files and directories have secure permissions - look for all files that do not have 0600 and all directories that do not have 0700.
+
+ - `find ~ \( -type f -not -perm 0600 \) -or \( -type d -not -perm 0700 \)`
+
+Operators are simple and, or, not and grouping. Logical AND is implied by default. The logical expressions are not evaluated if not needed, for performance.
+
+ - `-and / -a`, `-or / -o`, `-not / !`, `( )`
+
+Predefined actions
+
+We can also act on the items of the list produced by find. Predefined or user defined actions can be applied. Some predefined actions are listed below
+
+ - `-delete` - it does not prompt for confirmatio, so use `-print` first to see the list returned
+ - `-ls` - like performing `ls -dils`
+ - `-print` - output full pathname of matching file to standard output (default if no other action specified)
+ - `-quit` - quit once a match was made
+
+Note that actions and tests are treated the same from the logical operators' point of view. For example:
+
+ - `find ~ -type f -name "*.bak" -print` - find all back files
+ - `find ~ -print -type f -name "*.bak"` - will print out all files since it is the first test and it evaluates to true, then it will continue to test the other criteria
+
+User-defined Actions
+
+We can also invoke arbitrary commands. The traditional way is used `-exec` action: `-exec command {} ;` - the `{}` is a representation of the current pathname and the semicolon is required to indicate the end of the command.
+
+ - `exec rm '{}' ';'`
+	- brace and semicolon have special meaning to the shell, so quote or escape
+
+To execute an action interactively, `-ok` action should be used.
+
+ - `find ~ -type f -name 'foo*' -ok ls -l '{}' ';'`
+
+To not call a new instance of the command each time a match is found, we can combine all the search results and launch a single command with them as arguments. This can be done the tradition way, using the external command `xargs`, or using a new feature in `find` itself. The latter is achieved by simply the semicolong character to a plus sign.
+
+ - `find ~ -type f -name 'foo*' -ok ls -l '{}' +` - ls command is executed on an argument list comprised of the search results
+
+**<cmd: xargs;>**
+
+The xargs commands accepts input for standard input and converts it into an argument list for a specified command.
+
+ - `find ~ -type f -name 'foo*' -print | xargs ls -l`
+
+Note: the number of command line arguments is large, but not unlimited. xargs gets around this by executing the command with the maximum number possible and then repeats the process until standard input is exhausted. To see the maximum size of the command line: `xargs --show-limits`
+
+Names can contain embedded spaces, or even newlines, in their names. This is a problem for programs like xargs that construct argument lists for others. To overcome, find can be told to delimit the files with *null character*, 0, and xargs can be told to accept null-separated input.
+
+ - `find ~ -name '*.jpg' -print0 | xargs --null ls -l`
+
+---
+
+**<cmd: touch;>**
+
+Usually used to set or update the access, change and modify times of files, it is also used to create an empty file.
+
+ - `mkdir -p p/dir-{001..100}`
+ - `touch p/dir-{001..100}/file-{A-Z}`
+
+The above creates 100 subdirectories with 26 empty files each.
+
+ - `touch p/timestamp` - creates and empy file and sets its modification time to current time
+ - `stat p/timestamp - reveals all that the system understands about a file and its attributes
+
+Example
+
+ - `touch p/timestamp`
+ - `find p -type f -name 'file-B' -exec touch '{}' ';'` - update file-B files
+ - `find p -type f -newer p/timestamp' - find files newer than a file
+
+To find the files and directories with not ok permission, and then to change these permissions
+
+ - `find p \( -type f -not -perm 0600 -exec chmod '{}' ';' \) or \( -type d -not -perm 0700 -exec chmod 0700 '{}' ';' \)`
+
+---
+
+Options
+
+The options are used to control the scope of a *find* serach. They may be included with other tests and actions when constructing expressions.
+
+ - `-depth` - process a directory's files before the directory itself
+ - `maxdepth levels` - how much find will descen
+ - `mindepth levels` - minimum number of level *find* will descend before applying tests and actions
+ - `mount` - not to traverse directories that are mounted on other file systems
+ - `noleaf` - not optimze search based on the assumption that it is searching a Unix-like filesystem (for dos/windows, cd-rom filesystems)
+
+*Resources*
+
+ - [GNU findutils](https://www.gnu.org/software/findutils/)
 
 
  
