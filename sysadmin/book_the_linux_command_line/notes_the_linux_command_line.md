@@ -1039,6 +1039,78 @@ This can also be used to verify if we have written an image correctly on the med
 
  - [why dd doesn't work on audio CDs](https://www.quora.com/Why-doesnt-the-Linux-DD-command-work-with-audio-CDs)
 
+### Networking
+
+*Network monitoring*
+
+**<cmd: ping; traceroute; ip; netstat;>**
+
+ - `ping linuxcommand.org` - test network connection
+ - `traceroute shashdor.org` - see routers along the way to a host
+    - `*` in the output means that the hop does not provide identifying information, due to router configuration, network congestion, firewall etc; may be overcome by using `-T / -I` as parameter (tcp syn / icmp echo)
+ - `ip` - multi-purpose network config tool (replaces the deprecated `ifconfig`)
+    - `ip a` - show network interfaces, their state and configuration
+ - `netstat` - examine various network setting and statistics
+    - `netstat -ie` - examine the network interfaces in our system, including stats
+    - `netstat -r` - kernel's routing table
+
+*File download*
+
+**<cmd: ftp; lftp; wget;>**
+
+One of the first programs of the Internet is `ftp` - gets its name from the *File transfer protocol*. Browser now support URIs of the form `ftp://`, but before browsers there were FTP clients that talked with FTP servers. In its original form it is not secure - it sends username and passwords in clear text. Over the internet, usually *anonymous FTP servers* are used - anyone can log in with the username *anonymous* and a meaningless password.
+
+ - `ftp fileserver` - connect to a FTP server (fileserver.localdomain)
+    - *anonymous* username (some servers accept a blank passwords, others expect one in the form of an email)
+    - `cd` - change directory (note that `pub` is usually where public info is storec on a FTP server)
+    - `ls`
+    - `lcd Desktop` - change local directory
+    - `get ubuntu-xxx.iso` - download file from FTP dir to local dir
+    - `bye` - exit
+
+A better FTP client is `lftp` - it has many convenience features - automatic retry, background processes, tab completion, multiple-protocol support (including HTTP), others.
+
+Another popular program for file downloading is `wget` - download from both web and FTP sites. Single files, multiple files or even entire sites can be downloaded.
+
+ - `wget http://linuxcommand.org/index.php` - see man page for features like recursive download, background download, complete partial download
+
+*Secure communication*
+
+**<cmd: ssh;>**
+
+Even before the Internet age, UNIX systems were routinely remotely administered. The programs used were `rlogin` and `telnet`. Both send data in cleartext.
+
+The SSH (Secure Shell) was developed to address this problem. It 1) authenticates that the remote host is who it says and 2) it encrypts all the communication. Port 22 is used on the server side to listen for incoming connections from SSH clients. Most Linux distros ship with the OpenSSH implementation (from the OpenBSD project), some with only the client, some with client and server.
+
+ - `ssh [user@]remote-system`
+ - `ssh [user@]remote-system 'ls *' > dirlist.txt` - run ls on a remote system and redirect the output to a local file
+    - note the `' '`, single quotes, since we do not want the *pathname expansion* to take place on our local shell, but on the remote
+
+The SSH client stores authentication data for remotes in `~/.ssh/know_hosts`, one per line. If a server changes its id, you should verify with the admin that this is really the case, and then remove the entry from the local storage. The idea is to prevent a man-in-the-middle-attack.
+
+When connection to a remote host, SSH establishes a *tunnel*. By default, commands typed at the local system go into the tunnel, as does the result of those commands on the other side. But this can also be used to send most types of traffic, creating a sort of VPN. One of the most common uses of this is X Windown traffic - on a system running an X server (GUI), it is possible to run an X client (a graphical application) on a remote system and have its output, its display appear on the local system.
+
+ - `ssh -X remote-system; xload`
+
+**<cmd: scp; sftp;>**
+
+OpenSSH also includes two programs that can use the encrypted tunnel to copy files.
+
+`scp` works like `cp`, but it can connect to a remote system.
+
+ - `scp remote-sys:document.txt .` - copy document.txt from our home on remote-sys into the current (local) directory
+
+`sftp` is a secure replacement for the `ftp` program. One thing to note is that it does not require an FTP server to run on the remote system, it only requires the SSH servers.
+
+ - `sftp remote-sys`
+    - `ls`
+    - `lcd Desktop`
+    - `get ubuntu-xx.iso'
+    - 'bye'
+
+SFTP is usually supported by many file-managers. An URI beginning with `sftp://` will allow you to operate files on a remote system.
+
+The most common SSH client for Windows is PuTTY. Also used is MobaXterm.
 
 
 
