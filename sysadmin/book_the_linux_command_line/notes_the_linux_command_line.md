@@ -40,7 +40,7 @@ To **end a terminal session**: `exit`, or close the window or `Ctrl-d`.
 
 Hierarchical directory structure = file system tree for directories and files. *Root* directory is the first direcotry in the tree. Linux has a single tree for all devices; storage devices are mounted at various points in the tree.
 
-**<cmd: pwd; cd>**
+**`<cmd: pwd; cd>`**
 
  - `pwd` - display current working directory (where we are now in the tree)
  - `cd` - change working directory; specify an absolute or relative pathname
@@ -50,7 +50,7 @@ Hierarchical directory structure = file system tree for directories and files. *
 
 Filenames: "." as a first character denotes a hidden file or directory; avoid spaces; extensions doesn't count, but many applications programs use them.
 
-**<cmd: ls>**
+**`<cmd: ls>`**
 
  - `ls` - list content of directory or multiple directories (ex: `ls ~ /usr/bin`)
     - `ls -l` - more details (long format)
@@ -61,7 +61,7 @@ Filenames: "." as a first character denotes a hidden file or directory; avoid sp
 
 The date in the long format is the date and time of the file's last modification.
 
-**<cmd: file; less; reset>**
+**`<cmd: file; less; reset>`**
 
  - `file filepath` - determine a filetype. Not determined by extension.
  - `less filepath` - scrollable display of a text file
@@ -131,7 +131,7 @@ Note: traditional Unix style character ranges like `[A-Z]` or `[a-z]` can still 
 
 Note: wildcards also work in some GUI file managers, like the Nautilus file manager.
 
-**<cmd: mkdir; cp; mv; rm; ln>**
+**`<cmd: mkdir; cp; mv; rm; ln>`**
 
  - `mkdir dir1` - create directory, or multiple directories (`mkdir dir1 dir2 ...`)
     - `mkdir -p dirpath` - create directory, including parent directories
@@ -175,12 +175,12 @@ A command can be
  - a shell function (like a small shell script, incorporated into the environment)
  - an alias (commands that we can define, formed out of other commands)
 
-**<cmd: type; which>**
+**`<cmd: type; which>`**
 
  - `type cmd` - identifies the type of command. type is shell builtin
  - `which executable` - gives the location of the command of type executable program
 
-**<cmd: help, man, apropos, whatis, info, zless>**
+**`<cmd: help, man, apropos, whatis, info, zless>`**
 
 Now that we know the type, we can get the **documentation** of the command.
 
@@ -200,7 +200,7 @@ The GNU Project offers an alternative to man, called info. It is a hyperlinked c
 
 Many programs come with documentation in `/usr/share/doc`. Either as text, or html or gzipped text files. For zip, use `zless` to unpack and page them.
 
-**<cmd: alias; unalias>**
+**`<cmd: alias; unalias>`**
 
 New commands can be created with `alias`. To check if the new command name that you want to use is free, use `type`. However, aliases can be used to overwrite a command, like it is usually done with `ls`. Note that defining an alias on the command line will only persist for the current terminal session.
 
@@ -232,7 +232,7 @@ Note that the output redirection always truncates the file first. So, if we want
 
 Standard input can also be redirected. But first, cat.
 
-**<cmd: cat>**
+**`<cmd: cat>`**
 
  - `cat file...` - copy the contents of one or more file to stdout
  - `cat > newfile.txt` - create newfile with input from keyboard
@@ -244,7 +244,7 @@ With no arguments, `cat` expects input from standard input. It copies the input 
 
 Note: GNU programs usually accepts multiple files as arguments; one of those arguments can be `-`, which signifies standard input.
 
-**<cmd: sort; uniq; wc; grep; tee>**
+**`<cmd: sort; uniq; wc; grep; tee>`**
 
 Standard input and standard output are put to good use by the shell **pipelines**, using the pipe operator (|). The stdout of one command is piped into the stdinput of another. More commands chained together that perform complex operations on data, are usually referred to as `filters`.
 `
@@ -271,7 +271,7 @@ Some other common "filter" commands are
 
 When pressing enter, bash performs several substitutions to our text before it carries out the command (wildcards, for example). This is called **expansion**.
 
-**<cmd: echo;>**
+**`<cmd: echo;>`**
 
  - `echo arg...` - arguments are displayed on stdout
  - `echo *` - will not print `*`, but the expanded list of files and directories in the current directory; echo never saw the wildcard, the shell gave it the expanded result
@@ -378,7 +378,7 @@ Recent bash versions allows for programmable completion. For example: options fo
 
 Bash keeps the command history in the file `.bash_history` in your home directory. It can be viewed using `history | less`. An *history expansion* can be used.
 
-**<cmd: history;>**
+**`<cmd: history;>`**
 
  - `history | grep /usr/bin` - search history
  - `!88` - execute command 88 from `history` listing
@@ -399,7 +399,7 @@ Using `Ctrl-r` you can do a reverse incremental search. We can execute the found
  - Alt-n - non incremental forward search
  - Ctrl-o - execute current history item and move to next, then cycle
 
-**<cmd: script;>**
+**`<cmd: script;>`**
 
  - `script [file]` - can record a shell session to a file; it includes everything on the terminal. See the man for options and features, including a cool example with a named pipe, `mkfifo + script + cat`.
 
@@ -415,7 +415,7 @@ The files used to manage this are: `/etc/passwd` - user (login) name, uid, gid, 
 
 Traditional Unix style systems assign regular user to a *users* group, while modern Linux distribution create a unique, single member group with the same name as the user. Makes permission management easier.
 
-**<cmd: id;>**
+**`<cmd: id;>`**
 
  - `id [username]` - display information about a user, or about current user (name, uid, gid, groups)
 
@@ -443,7 +443,7 @@ The remaining nine characters, the *file mode*, are the read write execute permi
     - file: can be treated as a program and executed
     - directory: allows a directory to be entered
 
-**<cmd: chmod; umask;>**
+**`<cmd: chmod; umask;>`**
 
 In order to change the file mode, the command to use is `chmod`. Only the file owner or the superuser can do this. It can be done via octal representation (one octal digits - 3 bits - rwx), or via symbolic representation (who - u user owner, g group owner, o other word, a all; operation - `+`, `-` or `=`; what - r, w, x).
 
@@ -469,7 +469,7 @@ The third is called the *sticky bit* (1000) - holdover from traditional Unix *no
 
 There are several ways to **change identities**, aka assume other users' identities: logout and log back in, use `su`, use `sudo`.
 
-**<cmd: su; sudo;>**
+**`<cmd: su; sudo;>`**
 
 The `su` command start a shell as another user. With `-l`, a *login shell* is started, which loads the user's environment and changes to his home directory - this is usually what we want. If no username is specified, superuser is assumed.
 
@@ -494,7 +494,7 @@ Note: on Ubuntu, the root account is by defaul disabled (it has no password set)
 
 The owner and group owner of a file can be changed, with superuser privileges, using `chown`.
 
-**<cmd: chown; chgrp;>**
+**`<cmd: chown; chgrp;>`**
 
  - `chown [owner][:[group]] file...`
  - `bob` - change file owner to bob
@@ -520,7 +520,7 @@ Example: setting up a shared folder for music between multiple users on the syst
 
 To **change your password**, use the `passwd` command. It can change your own password, or the one for other users, if you have superuser privileges.
 
-**<cmd: passwd;>**
+**`<cmd: passwd;>`**
 
  - `passwd [user]` - will be prompted for old and new password
 
@@ -555,7 +555,7 @@ Another common format of ps options is `ps aux`, which shows even more informati
  - RSS - resident set size - amount of physical memory (RAM) used, in kilobytes
  - START - time when process started
 
-**<cmd: ps; top;>**
+**`<cmd: ps; top;>`**
 
  - `ps` - processes from current terminal session
  - `ps x` - all processes that the current user owns
@@ -588,7 +588,7 @@ A program running in the background does not receive keyboard input, so is also 
 
 A foreground process can be stopped/paused with `Ctrl-z`. We can continue its execution in the foreground or resume it in the background with `bg`.
 
-**<cmd: &; jobs; fg; bg; Ctrl-c; Ctrl-z;>**
+**`<cmd: &; jobs; fg; bg; Ctrl-c; Ctrl-z;>`**
 
  - `cmd &` - execute in background; the output printed contains the job number and the PID of the process
  - `jobs` - see processes launched from our terminal (job control facility of the shell)
@@ -597,7 +597,7 @@ A foreground process can be stopped/paused with `Ctrl-z`. We can continue its ex
 
 A process can be killed by sending it a **signal**. This is what the kill command does. Ctrl-c sends an INT (interrupt) signal, while Ctrl-z send a TSTP (terminal stop) signal. Programs listen to signal and react to them. This allows, for example to save work and terminate when receiving a kill or a Ctrl-c.
 
-**<cmd: kill; killall;>**
+**`<cmd: kill; killall;>`**
 
  - `kill PID` - kill process (send it TERM signal)
  - `kill -signalnumber PID`
@@ -642,7 +642,7 @@ Other process related commands
 
 The shell stores *shell variables* and *environment variables* in the environment. With bash, they are very similar. Shell variables consists of data placed there by bash, env variables are all the rest. The shell also stores *aliases* and *shell functions*.
 
-**<cmd: printenv; set; alias;>**
+**`<cmd: printenv; set; alias;>`**
 
  - `printenv | less` - list environment variables
 	- `printenv USER` - list value for variable USER
@@ -674,7 +674,7 @@ To **modify the environment**, a rule of thumb is to place PATH modifications an
 
 Text editors can be GUI or text. GUI: gedit (GNOME), kedit, kwrite, kate (KDE). Text: nano, vi (replaced on most distros by vim - vi improved), emacs (gigantic, all-purpose, does-everything programming environment).
 
-**<cmd: nano;>**
+**`<cmd: nano;>`**
 
 nano was designed as a small text editor for an email client, so it does not have many fancy features, but it is easy to use. At the bottom it shows a menu with commands in which the `^X` notation means `Ctrl-x`.
 
@@ -876,7 +876,7 @@ There are usually two types of tools
 
 **Common tasks**
 
-**<cmd: dpkg; apt-get; apt-cache; rpm; yum;>**
+**`<cmd: dpkg; apt-get; apt-cache; rpm; yum;>`**
 
  - finding a package
     - `apt-get update; apt-cache search search_string`
@@ -926,7 +926,7 @@ File `/etc/fstab` lists the devices that will be mounted at boot time. Fields:
  - 5 - frequency - if and when a file system is to be backed up with the `dump` command
  - 6 - order - what order file systems should be checks with the `fsck` command
 
-**<cmd: mount; umount;>**
+**`<cmd: mount; umount;>`**
 
 View list of the file systems currently mounted - `mount`. Format: *device on mount-point type file-system-type (optons)*.
 
@@ -959,7 +959,7 @@ To see the name of a new device use `tail -f` on /var/log/messages or /var/log/s
 
 *Partitions and file system utils*
 
-**<cmd: fdisk; mkfs; fsck;>**
+**`<cmd: fdisk; mkfs; fsck;>`**
 
 Manipulating partitions on a disk-like device can be done with `fdisk`. The device has to be unmonted, then: `sudo fdisk /dev/name`. The entire device must be given, not a partition name.
 
@@ -984,7 +984,7 @@ Note: "what the fsck?!" - unix culture, fsck used in place of a popular word
 
 *Moving data directly to and from devices*
 
-**<cmd: dd;>**
+**`<cmd: dd;>`**
 
 Disks can be seen not only as directories and files, but as raw data blocks as well. This gives us the ability, for example, to clone a disk.
 
@@ -999,7 +999,7 @@ Example: two identical drives attached to a computer, to copy all from one to an
 
 *Creating and writing CD-ROM images*
 
-**<cmd: genisoimage; wodim;>**
+**`<cmd: genisoimage; wodim;>`**
 
 To make an ISO image on an existing CD-ROM, we can simpy use `dd` like in the above example (from CD-ROM device to local file). (for audio CDs, look at `cdrdao` command)
 
@@ -1025,7 +1025,7 @@ To write an image on a CD/DVD, the `wodim` program is used
 
 *Integrity check*
 
-**<cmd: md5sum;>>**
+**`<cmd: md5sum;>>`**
 
 To verify the integrity of an ISO image a checksum is used. Usually, it is an md5 sum.
 
@@ -1043,7 +1043,7 @@ This can also be used to verify if we have written an image correctly on the med
 
 *Network monitoring*
 
-**<cmd: ping; traceroute; ip; netstat;>**
+**`<cmd: ping; traceroute; ip; netstat;>`**
 
  - `ping linuxcommand.org` - test network connection
  - `traceroute shashdor.org` - see routers along the way to a host
@@ -1056,7 +1056,7 @@ This can also be used to verify if we have written an image correctly on the med
 
 *File download*
 
-**<cmd: ftp; lftp; wget;>**
+**`<cmd: ftp; lftp; wget;>`**
 
 One of the first programs of the Internet is `ftp` - gets its name from the *File transfer protocol*. Browser now support URIs of the form `ftp://`, but before browsers there were FTP clients that talked with FTP servers. In its original form it is not secure - it sends username and passwords in clear text. Over the internet, usually *anonymous FTP servers* are used - anyone can log in with the username *anonymous* and a meaningless password.
 
@@ -1076,7 +1076,7 @@ Another popular program for file downloading is `wget` - download from both web 
 
 *Secure communication*
 
-**<cmd: ssh;>**
+**`<cmd: ssh;>`**
 
 Even before the Internet age, UNIX systems were routinely remotely administered. The programs used were `rlogin` and `telnet`. Both send data in cleartext.
 
@@ -1092,7 +1092,7 @@ When connection to a remote host, SSH establishes a *tunnel*. By default, comman
 
  - `ssh -X remote-system; xload`
 
-**<cmd: scp; sftp;>**
+**`<cmd: scp; sftp;>`**
 
 OpenSSH also includes two programs that can use the encrypted tunnel to copy files.
 
@@ -1114,7 +1114,7 @@ The most common SSH client for Windows is PuTTY. Also used is MobaXterm.
 
 ### Searching for Files
 
-**<cmd: locate;>**
+**`<cmd: locate;>`**
 
 The `locate` program performs a rapid database search of pathnames.
 
@@ -1124,7 +1124,7 @@ The `locate` program performs a rapid database search of pathnames.
 
 The locate database is created by another program - `updatedb`, which is usually run as a *cron job*. To update instantly, run it with superuser privileges, as exemplified above.
 
-**<cmd: find;>**
+**`<cmd: find;>`**
 
 `find` searches a given directory and its subdirecotries for files based on a variety of criteria. In its simplest form, find is given one or more names of directories to search, so it can be used to list files in a directory tree.
 
@@ -1206,7 +1206,7 @@ To not call a new instance of the command each time a match is found, we can com
 
  - `find ~ -type f -name 'foo*' -ok ls -l '{}' +` - ls command is executed on an argument list comprised of the search results
 
-**<cmd: xargs;>**
+**`<cmd: xargs;>`**
 
 The xargs commands accepts input for standard input and converts it into an argument list for a specified command.
 
@@ -1220,7 +1220,7 @@ Names can contain embedded spaces, or even newlines, in their names. This is a p
 
 ---
 
-**<cmd: touch;>**
+**`<cmd: touch;>`**
 
 Usually used to set or update the access, change and modify times of files, it is also used to create an empty file.
 
@@ -1257,6 +1257,147 @@ The options are used to control the scope of a *find* serach. They may be includ
 *Resources*
 
  - [GNU findutils](https://www.gnu.org/software/findutils/)
+
+### Archiving and Backup
+
+*Compressing files*
+
+Data compression is removing redundancy from data. For example, instead of having a 100 x 100 pixels black picture, we could specify it as 1 black pixel, 10 000 times. This is one of the most rudimentary compression schemes, called *run-length encoding*.
+
+Compression algorithms can be *lossless* (preserves all data, a restored version is exactly the same) or *lossy* (removes some of the data; examples are JPEG and MP3). For compressing data files we talk only about *lossless*.
+
+**`<cmd: gzip; gunzip; zcat; zless;>`**
+
+`gzip` replaces the original file with a compressed version. `gunzip` restores it.
+
+ - `gzip foo.txt` - replaces foo.txt with foo.txt.gz, smaller in size, same persmissions, same timestamp
+	- `-c / --stdout / --to-stdout` - keep original files, write output to standard output
+	- `-d / --decompress / --uncompress` - act like gunzip
+	- `-f / --force` - force compression even if a compressed version of the file exists
+	- `-l / --list` - list compression stats for each existing compressed file
+	- `-r / --recursive` - if arguments are directories, recursevily compress files withing them
+	- `-v` - verbose
+	- `-t` - test the integrity of an existing compressed file
+	- `-number` - set amount of compression from 1 (`--fast`) to 9 (`--best`); default is 6
+ - `gunzip foo.txt[.gz]` - restores the original version, same permissions and timestamp
+	- `gunzip -c foo.txt | less` - only view the contents of a compressed file (or use `zcat` supplied with gzip, does the same thing; or even `zless`)
+
+**`<cmd: bzip2; bunzip2; bzcat; bzip2recover;>`**
+
+The `bzip2`program is similar but achieves hight compression and the cost of speed. The usual extension is `.bz2`. The program can be used in the same way as gzip. Note that the *-number* option has a different meaning and it does not support *-r*. It also comes with a `bzcat` program, as well as a program that will try to recover damaged bz2 files, `bzip2recover`.
+
+*Note*: compressing an already compressed file, like a jpg, will most likely give you a large size. There is no redundant data left that could be saved so that it outweighs the overhead added by the compression scheme.
+
+*Archiving files*
+
+Archiving means gathering up many files and budling them together into a single large file. It is usually done in backup, when moving data from one system to another.
+
+**`<cmd: tar;>`**
+
+The `tar` program is the classic tool for archiving in Unix world (*tape archive*).
+
+ - `tar mode[options] pathname...`
+	- `c` (mode) - create an archive from a list of files and/or directories
+	- `x` (mode) - extract an archive
+	- `r` (mode) - append specified pathnames to the end of an archive
+	- `t` (mode) - list the contents of an archive
+ - `tar cf playground.tar playground-dir` - the `f` option specified the name of the tar archive to be created out of the directory hierarchy; it will also include the top playground-dir directory
+ - `tar tvf playground.tar` - list the contents, with more details - `v` option
+ - `tar xf pathto/playround.tar` - extract the content of the archive in the current directory
+	- unless done as superuser, files and directories extracted take on the ownership of the user doing the operation rather than the original owner
+
+Another interesting behaviour is how tar handles pathnames. The default is relative; tar removes any leading slash from the pathname when creating the archive.
+
+ - `[host1]$ sudo tar cf /media/bigdisk/home.tar /home` - archive home folder on external media
+ - `[host2]$ cd / && sudo tar xf /media/bigdisk/home.tar` - change firs to root dir since the pathnames inside are relative
+
+You can also specify pathnames to be extracted from inside the archive, instead of extracting the entire contents. The GNU version even allows pattern matching with the `--wildcards` option.
+
+ - `cd foo && tar xf ../playground.tar --wildcards 'playground/dir-08*'`
+
+Often tar is used in conjunction with find to produce archives. For incremental backups, find can use a "timestamp" file to find newly modified files and add the pathnames to an archive.
+
+ - `find playground -name 'file-A' -exec tar rf playground.tar '{]' '+'`
+
+Tar can also make use of standard input and standard output. In the example below, tar accepts the standard `-` to indicate either standard input or output, as needed; the `--files-from / -T` option causes tar to read its list of pathnames from a file rather than the command line. The output of tar is piped into gzip to produce a compressed archive (conventional extension `.tgz`, or `tar.gz`).
+
+ - `find playground -name 'file-A' | tar -cf - --files-from=- | gzip > playground.tgz`
+ - `find playground -name 'file-A' | tar -czf playground.tgz -T -`
+	- the compression can also be done directly by modern version of tar (both gzip and bzip) with `z`, `j` options. For bzip compression, the extension usually is `.tbz`
+
+Using stdin and stdout we can also transfer files between networked systems.
+
+ - `mkdir remote-stuff`
+ - `cd remote-stuff`
+ - `ssh remote-sys 'tar cf - Documents' | tar xf -` - this will give uss the Documents folder in current dir
+
+**`<cmd: zip; unzip;>`**
+
+The `zip` program is both a compression tool and an archiver. The file format is familiar to Windows users.
+
+ - `zip options zipfile file...`
+ - `zip -r playground.zip playground` - create a zip archive out of the playground directory and its contents
+ - `cd foo; unzip ../playground.zip` - extract the contents of a zip file in the current directory
+ - `unzip -l playground.zip playground/dir-087/file-Z` - the l option only tells unzip to list the contents; `-v` can be added to increase verbosity
+ - `cd food; unzip ../playground.zip playground/dir-087/file-Z` - extract specific file from archive; if the file already exists, the user is prompted
+
+The messages shown by zip when creating an archive represent if the file or directory is *stored* as is or is *deflated* (compressed). A difference from tar is that if the archive already exists, zip will update it rather than replace it. It will add new files and matching files will be replaced.
+
+zip can also use standard input and output, but not quite like tar
+
+ - `find playground -name "file-A" | zip -@ file-A.zip` - the `@` options allows us to pipe a list of filenames
+
+zip can also write its output to stdout but few programs can make use of the output. Unfortunately, the unzip program does not accept standard input, so zip and unzip can't be used together to perform network file copying like tar. zip does accept standard input so it can be used to compress the output of other programs while unzip can redirect its output to standard output
+
+ - `ls -l /etc/ | zip ls-etc.zip -`
+ - `unzip -p ls-etc.zip | less`
+
+*Synchronizing Files and Directories*
+
+**`<cmd: rsync;>`**
+
+A common backup strategy is to keep on or more directories synchronized with another directory or directories located on either the local system (usually a removable storage device of some kind) or a remote system. In the Unix world, the preferred tool for this is `rsync` that uses the *rsync remote-update protocol*, which allows rsync to quickly detect differences between two directories and perform the minimum copying required.
+
+ - `rsync options source destination` - source and destination can be
+	- local file or directory
+	- remote file or directory `[user@]host:path`
+	- a remote rsync server specified with a URI of `rsync://[user@]host[:port]/path`
+		- either the source or destination must be local
+ - `rsync -av playground foo` - sync the playground directory with a local copy in foo
+	- `-a` - archiving - causes recursion and preservation of file attributes
+	- `-v` - verbose
+
+rsync will detect if there are no changes and a susequent mirroring of playground to foo/playground will copy no files. If we `touch` a file in the source, it will update it.
+
+Note there is a subtle feature when specifying a rsync source
+
+ - `rsync source-dir destination-dir` - source-dir will be copied into destination-dir (destination-dir/source-dir/)
+ - `rsync source-dir/ destination-dri` - the contents of source-dir will be copied
+
+A simple example backup of important stuff to a "big" external disk
+
+ - `mkdir /media/bigdisk/backup`
+ - `sudo rsync -av --delete /etc /home /usr/local /media/bigdisk/backup`
+	- the `--delete` option will remove files that may have existed in the backup folder, but don't exist anymore in the source
+
+A simple alias could be
+
+ - `alias backup='sudo rsync -av --delete /etc /home /usr/local /media/bigdisk/backup'`
+
+One of the important features of rsync is that it can be used to *copy files over a network*. The first way to do this is with another system that has rsync installed, along with a remote shell program such as ssh.
+
+ - `sudo rsync -av --delete --rsh=ssh /etc /home /usr/local remote-sys:/backup`
+	- `--rsh=` - which remote shell rsyhnc will use to connect and transfer data
+
+The second way to do this is by using a *rsync server*. rsync can be configured to run as a daemon; usually this is done to allow mirrorin of a remote system
+
+ - `mkdir fedora-devel` 
+ - `rsync -av --delete rsync://archive.linux.duke.edu/fedora/linux/development/rawhide/Everything/x86_64/os/ fedora-devel`
+
+### Regular Expressions
+
+
+
 
 
  
