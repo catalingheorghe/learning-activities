@@ -1396,13 +1396,237 @@ The second way to do this is by using a *rsync server*. rsync can be configured 
 
 ### Regular Expressions
 
+Text manipulation play a big role in Unix-like systems, and regular expressions are a very powerful tool for this.
 
+Regular expressions are symbolic notations used to identify patterns in text. In a way similar to shell wildcard, but much more capable. Note that there are different versions of regular expressions, they vary from tool to tool and programmin language to language. This will present regular expressions as in the **POSIX variant** (which covers most of the command line tools). Most programming languages (most notably Perl) uses a slightly larger and richer set of nations.
 
+**`<cmd: grep;>`**
 
+"global regular expression print" - search text file for occurences of text matching the regular expression and prints any line with a match in it.
 
- 
+Common grep options:
 
+ - `-i / --ignore-case`
+ - `-v / --invert-match` - print lines that do not contain a match
+ - `-c / --count` - print the number of matches instead of the lines themselves
+ - `-l / --files-with-matches` - print name of each file that contains a match instead of lines themselves
+ - `-L / --files-without-match`
+ - `-n / --line-number` - prefix with line number
+ - `-h / --no-filename` - for multi-file searche, suppress the output of filenames
 
+Examples of usage, considering we have multiple files that contain listing of various directories from the system.
+
+ - `grep bzip dirlist*.txt` - pathname expansion will give all files as arguments to grep
+
+*Literals and metacharacters*
+
+"bzip" is a very simple regular expression used in the previous example: a match will occurt if the line in the file contains at least four characters and that somewhere in the line the characters in "bzip" are in exactly this order. The characters in "bzip" are *literal characters* - they match the letters.
+
+Regular expressions use *metacharacters* to specify more complex matches: `^ $ . [ ] { } - ? * + ( ) | \`. The backslash is used to escape metacharactes and in a few cases to create *meta sequences*.
+
+Note that many regular expression metacharacters are also special for the shell. To not be expanded, the regular expression needs to be quoted.
+
+ - any character `.` - matches any character, exactly one character
+	- `.zip` - four characters; including also the literal ".zip"
+ - anchors - the caret `^` and dollar `$` - match the beginning or end of the line respectively
+	- `grep -h '^zip' dirlist*.txt` - zip, zipcloack, zipinfo ...
+	- `grep -h '^zip$ dirlist*.txt` - zip
+	- `^$` - this will match blank lines
+	- `grep -i '^..j.r$' /usr/share/dict/words` - crossword solver using the dictionary that comes with linux distributions
+ - bracket expressions and character classes - match a character from a set of characters
+	- bracket expressions - match a character from a set of characters; the set can include metacharacters
+		-`grep -h '[bg]zip' dirlist*.txt`
+	- two metacharacters still have special meaning inside: `^` - negation, `-` - range
+		- only if `^` is the first character in a bracket expression, then the set is an inverted match
+			- `grep -h '[^bg]zip' dirlist*.txt` - not b or g, still requires one character
+		- traditonal character ranges
+			- `grep -h '^[A-Z]' dirlist*.txt`
+			- `^[A-Za-z0-9]` - first character is a letter or number
+			- `[-AZ]` - here the dash will not be treated specially; this will match either dash, A or Z
+		- POSIX character classes
+			- `[:alnum:]`
+			- `[:word:]` - alnum plus `_` underscore
+			- `[:alpha:]`
+			- `[:blank:]` - space and tab
+			- `[:cntrl:]` - ASCII control code - chars 0-31 and 127
+			- `[:digit:]`
+			- `[:graph:]` - visible characters; in ASCII, 33 - 126
+			- `[:lower:]`
+			- `[:punct:]` - punctuation characters
+			- `[:upper:]`
+			- `[:print:]` - printable charactes, graph puls the space character
+			- `[:space:]` - whitespace characters including space, table, carriage return, newline, vertical tab, form feed.
+			- `[:upper:]`
+			- `[:xdigit:]` - characters for hexadecimal numbers
+
+*Note about wildcards and character ranges*
+
+**`<cmd: locale;>`**
+
+In the beginning of UNIX, it used only ASCII characters. ASCII *collation order* is first uppercase, then lowercase, not like the dictionary order aAbB and so on. Support for characters not found in the English language was added by expanding the ASCII table to use characters 128-255. POSIX introduced a concept called *locale*, which could be adjusted to select the character set. `echo $LANG` will show the language setting in our system. With `en_US.UTF-8` POSIX compliant applications will use the dictionary order for ranges; that is why `[A-Z]` will not be only uppercase letters. POSIX then introduces character classes to address this. Note that there is still no convient way to express partial ranges, such as `[A-M]` for shell pathname expansion.  
+
+The LANG variable contains the name of the language and the character set used in your locale. This is determined when a language was selected during installation. See `locale` command. To revert to traditional UNIX behaviours, to use U.S. English - ASCII: `export LANG=POSIX`. Can be made permanent by adding it to `.bashrc`.
+
+*POSIX Basic vs Extended regular expressions (BRE, ERE)*
+
+**`<cmd: egrep;>`**
+
+The difference lies in the metacharacters recognized by the regular expression.
+
+ - BRE: `^ $ . [ ] *`
+ - ERE: BRE + `( ) { } ? + |`
+
+However, the (, ), {, and } are treated as metacharacters in BRS if they are escaped with a backslash, while preceding them with backslash in ERE will make it a literal.
+
+`grep` is usually BRE and `egrep` is ERE, but GNU version of `grep` supports extended regular expressions with the `-E` option. The next parts pertain to ERE.
+
+*Note about POSIX standard*
+
+In 1980s Unix was a popular commercial os. Vendors licenses the source code and attempted differentiation by customizing it, which lead to compatibility issues. This perios is now know as *the Balkanization*. IEEE began developing a set of standards to define how Unix and Unix-like systems perform - application programming interfaces, shell, utilities. The name POSIX was suggested by Richard Stallman - *Portable Operating System Interface* and an X for snappiness.
+
+*Alternation*
+
+Alternation allows a match to occur from among a set of expressions. To combine alternation with other regular expression elements, the () can be used.
+
+ - `echo "AAA" | grep -E 'AAA|BBB'` - match either the string AAA or the sring BBB; notice the quotes of the extended regular expression in order to prevent the shell from interpreting the vertical bar as a pipe operator
+ - `echo "CCC" | grep -E 'AAA|BBB|DDD'`
+ - `grep -Eh '^(bz|gz|zip)' dirlist*.txt` - without the parantheses it would mean begins with bz or contains gz or contains zip, not begins with one of them
+
+*Quantifiers*
+
+ERE support specifying a number of times an element is matched.
+
+ - `?` - match the preceding element zero or one time - basically, optional
+	- `^\(?[0-9][0-9][0-9]\)? [0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]$` - a regular expression for a phone number that can have the prefix in parantheses or not; the parantheses are escaped because they must be treated as literals, not metacharacters (ERE)
+ - `*` - match the preceding element zero or more time
+	- `[[:upper:]][[:upper:][:lower:] ]*\.` - a crude definition of a sentence - starts with any capital letter and is followed by any number of lowercase, uppercase or space until the final period
+ - `+` - match an element one or more times
+	- `^([[:alpha:]]+ ?)+$` - groups of one or more alphabetic characters separated by single spaces
+ - `{}` - match an element a specific number of times
+	- `{n}` - exactly n times
+	- `{n,m}` - between n and m times
+	- `{n,}` - at least n times
+	- `{,m}` - at most m times
+		- `^\(?[0-9]{3}\)? [0-9]{3}-[0-9]{4}$` - the regular expression from before, shorter
+
+*Putting regular expressions to work*
+
+Validate a phone list with grep: we have a text file with phone numbers one per line. We can scan for invalid numbers by using `-v` option to grep and the regular expression from before.
+
+ - `grep -Ev '^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$' phonelist.txt`
+
+Find ungly filenames with find: find has a test that can uses regular expressions; unlike grep, which will print a line that contains a match, for find, the pathname must match exactly. We can use this to find files that have in their pathname characters outside `[-_./0-9a-z-A-Z]`
+
+ - `find . -regex '.*[^-_./0-9a-zA-Z].*'` - we used zero or more instances of any characters at both ends, for a full match, and a negated bracket expression for the unacceptable characters
+
+Searching for files with locate: locate supports basic (`--regexp`) and extended (`--regex`) regular expressions
+
+ - `locate --regex 'bin/(bz|gz|zip)'`
+
+Searching for text in less and vim. less supports extended regular expressions, vim basic - so for vim the extra metacharacters must be escaped with a backslash. In vim, `:hlsearch` command mode command activates text match highlighting in the file.
+
+To find more applications that use regular expressions we can search the man pages
+
+ - `cd /usr/share/man/man1`
+ - `zgrep -El 'regex|regular expression' *.gz`
+
+*Note: one feature from basic regular expressions, back references, will be covered in the next chapter.*
+
+### Text Processing
+
+There are many tools used to "slice and dice" text.
+
+Applications of text are vast:
+
+ - configuration files
+ - documents - large documents in text format and then embed markup language to describe the formatting
+	- web pages - text documents either use *Hypertext Markup Language* or *Extensible Markup Language* for the visual format
+	- email - even non-text attachments are converted into text representation for transmission; a mail message seen with less with show a header with metadata and then the body with content
+	- printer output - output destined for a printer is sent as plain text, or if the page contains graphics, converted into a text format *page description language* known as PostScript, which is then set to a program that generates the graphic dots to be printed
+	- program source code
+
+*A second look at some programs*
+
+**`<cmd: cat; sort; uniq;>`**
+
+*cat*
+
+ - `-A` - display control characters; eg: MS-DOS line endings or lines of text with trailing spaces
+ - `cat > foo.txt` - primitive word processor to create and edit a file; Ctlr-d indicates end of file
+ - `-n` - disaply also line numbers
+ - `-s` - supress the output of multiple blank lines (show only one)
+
+Note about MS-DOS text vs Unix text: Unix and DOS define line endings differently. Unix ends a line with linefeed character (ASCII 10), while MS-DOS uses the sequence carriage return (ASCII 13) and linefeed. `dos2unix` and `unix2dos` are programs that convert lineendings, but this can be done with "basic" programs as well.
+
+*sort*
+
+Sort the contents of standard input or one or more specified files and sends the results to stdout.
+
+ - `sort file1 file2 file3 > final_sorted.txt` - merge multiple files into a sorted one
+ - `-b / --ignore-leading-blanks` - sort based on the first non-whitespace characters
+ - `-f / --ignore-case` - make sorting case-insensitive
+ - `-n / --numeric-sort`
+	- see also `-g` which is general numeric value, not string numerical value
+ - `-r / --reverse`
+ - `-k / --key=field1[,field2]` - sort basedon a key field rather than the entire line
+ - `-m / --merge` - treat arguments as pre-sorted and only merge them
+ - `-o / --output=file`
+ - `-t / --field-separator=char` - define field separator character; by default, spaces or tabs
+
+Sort the output of ls by size (even if can do it as well) by telling sort to use the 5th *field* in the *records* from the *tabular data* produced by ls.
+
+ - `ls -l | sort -nrk 5 | head`
+
+To properly use the k option, we have to understand how sort understands fields. By default the delimiters are whitespace characters (spaces and tabs). Note that the delimiters are included in the field, so they can affect sorting - for example different number of leading spaces. Also, the power comes from the fact that the sort can be done on multiple keys. The k option can be specified multiple times and it permits a range of fields. If no range is specified, the key is the field plus the rest of the line until the end.
+
+ - a file of lines in the format `Fedora	10		11/25/2008`
+	- `sort -key=1,1 -k 2n distros.txt` - first key is the distro name; second key starts at field 2 and is numeric (or even better, `g`, to handle decimal numbers properly)
+	- dates in computers are usually in the format YYYY-MM-DD, for easier chronological sorting; but the american format is MM/DD/YYYY; the key option allows specification of *offsets* within fields
+		- `sort -k 3.7nbr -k 3.1nbr -k3.4nbr distros.txt` - the `b` option is important because it ignores leading whitespaces, which is different between lines so can affect the sort
+ - a file like `/etc/passwd/` uses `:` (colons) for delimiters
+	- `sort -t ':' -k 7 /etc/passwd`  - sort by default shell
+
+*uniq*
+
+Compared with sort, uniq is lightweight. When given a sorted file (or standard input), it removes any duplicate lines.
+
+Note that the GNU version of sort has a `-u` option which removes duplicates.
+
+ - `-c / --count` - list of duplicate lines preceded by the repetition count
+ - `-d / --repeated` - output only repeated lines rather than unique lines
+ - `-f n / --skip-fields=n` - ignore n leading fields in each line; fields are separated by whitespace; no option to specify delimiter
+ - `-i / --ignore-case`
+ - `-u / --unique` - print only unique lines
+
+*Slicing and dicing*
+
+**`<cmd: cut; expand; >`**
+
+*cut*
+
+Extract a section of text from a line and output it to standard output. It can accept multiple files or input from standard input.
+
+ - `-c list / --characters=list` - extract the portion of the line defined by list - one or more comma-separated numerical ranges
+ - `-f list / --fields=list` - extract one or more fields
+ - `-d delim / --delimeter=delim` - for use with fields, specify the delimiting character; by default, fields must be separated by a single tab character
+ - `--complement` - extract the inverse
+
+The input for cut is not very flexible; you can use `cat -A` to see if a text is strict enough.
+
+ - `cut -f 2 distros.txt` - note that if the fields are not separated by exactly one tab, it won't give the expected results.
+
+If the file is spaces delimited, instead of tab delimited, on each line it should have a certain field at the same position as on any other line. This is when character extraction can be used
+
+ - `cut -f 3 distors.txt | cut -c 7-10` - extract the year from a list of MM/DD/YYYY by specifying a range
+
+If we want to extract via characters from a tab separated file, we need to expand the tabs. GNU coreutils offers a pair of programs that handles tab expansion
+
+ - `expand distros.txt | cut -c 23-` - expand tabs and then extract every character from the 23rd position to the end of the line (the year, again)
+ - `expand distros.txt | unexpand -a | cat -A`
+
+A different character can be specified as field delimiters to handle other types of files
+
+ - `cut -d ':' -f 1 /etc/passw | head` - first 10 user names
 
 
 
