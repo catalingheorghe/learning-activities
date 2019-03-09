@@ -836,14 +836,14 @@ Escape code can also move the cursor. Commonly used to provide a clock or some k
 
  - `PS1="\[\033[s\033[0;0H\033[0;41m\033[K\033[1;33m\t\033[0m\033[u\][\u@\h \W]\$ "`
     - each non-printing character sequence must be inside `\[ \]` to allow bash to calculate the size of the visible prompt
-    - \033[s - store the cursor position (not recognized by some terminal emulators)
-    - \033[0;0H - move to line 0, column 0
-    - \033[0;41m - set background color to red
-    - \033[K - clear till the end of the line (it will be cleared to red); cursor position not changed
-    - \033[1;33 - text color yellow
-    - \t - current time
-    - \033[0m - turn off color (both text and background)
-    - \033[u - restore cursor position saved earlier
+    - `\033[s` - store the cursor position (not recognized by some terminal emulators)
+    - `\033[0;0H` - move to line 0, column 0
+    - `\033[0;41m` - set background color to red
+    - `\033[K` - clear till the end of the line (it will be cleared to red); cursor position not changed
+    - `\033[1;33` - text color yellow
+    - `\t` - current time
+    - `\033[0m` - turn off color (both text and background)
+    - `\033[u` - restore cursor position saved earlier
 
 To **save the prompt** the PS1 setting must be added to .bashrc and the variable exported.
 
@@ -1246,13 +1246,13 @@ To find the files and directories with not ok permission, and then to change the
 
 Options
 
-The options are used to control the scope of a *find* serach. They may be included with other tests and actions when constructing expressions.
+The options are used to control the scope of a *find* search. They may be included with other tests and actions when constructing expressions.
 
  - `-depth` - process a directory's files before the directory itself
- - `maxdepth levels` - how much find will descen
- - `mindepth levels` - minimum number of level *find* will descend before applying tests and actions
- - `mount` - not to traverse directories that are mounted on other file systems
- - `noleaf` - not optimze search based on the assumption that it is searching a Unix-like filesystem (for dos/windows, cd-rom filesystems)
+ - `-maxdepth levels` - how much find will descen
+ - `-mindepth levels` - minimum number of level *find* will descend before applying tests and actions
+ - `-mount` - not to traverse directories that are mounted on other file systems
+ - `-noleaf` - not optimze search based on the assumption that it is searching a Unix-like filesystem (for dos/windows, cd-rom filesystems)
 
 *Resources*
 
@@ -1476,7 +1476,7 @@ The difference lies in the metacharacters recognized by the regular expression.
  - BRE: `^ $ . [ ] *`
  - ERE: BRE + `( ) { } ? + |`
 
-However, the (, ), {, and } are treated as metacharacters in BRS if they are escaped with a backslash, while preceding them with backslash in ERE will make it a literal.
+However, the (, ), {, and } are treated as metacharacters in BREs if they are escaped with a backslash, while preceding them with backslash in ERE will make it a literal.
 
 `grep` is usually BRE and `egrep` is ERE, but GNU version of `grep` supports extended regular expressions with the `-E` option. The next parts pertain to ERE.
 
@@ -1600,7 +1600,7 @@ Note that the GNU version of sort has a `-u` option which removes duplicates.
 
 *Slicing and dicing*
 
-**`<cmd: cut; expand; >`**
+**`<cmd: cut; expand; paste;>`**
 
 *cut*
 
@@ -1627,6 +1627,195 @@ If we want to extract via characters from a tab separated file, we need to expan
 A different character can be specified as field delimiters to handle other types of files
 
  - `cut -d ':' -f 1 /etc/passw | head` - first 10 user names
+
+*paste*
+
+It is the opposite of cut: it adds one or more columns of text to a file. For example if we split the distros text file (sorted by release date) in one containing only the date and one containing the name and version, we can then use paste to create a new file in which the date is the first column
+
+ - `paste distros-dates.txt distros-versions.txt > distros-dates-first.txt`
+
+*join*
+
+The join program acts like a join from relational databases, where data from multiple tables with a shared key is combined to form a desired result. In order to function properly the files must be sorted on the key field. By default, join uses whitespace as the input field delimiter and a single spaece as the output field delimiter (can be changed by options).
+
+For example, if we split the distros.txt (after we sort it by release date) into one file with date and version and a second file with date and name, then we could join the two together simply by calling join:
+
+ - `join distros-key-names.txt distros-key-versions.txt`
+
+*Comparing text*
+
+**`<cmd: comm; diff; patch;>`**
+
+*comm*
+
+The comm program compares two text files and produces an output split into three columns: two for the lines unique in each file and the third for the lines that are common.
+
+ - `comm file1.txt file2.txt`
+ - `comm -n file1.txt file2.txt` - n is either 1, 2, or 3 - which column(s) to suppress
+	- `comm -n12 file1.txt file2.txt` - show only lines shared by both files
+
+*diff*
+
+The diff program is much more complex, oftern used to examine source code changes; can handle directories (*source trees*). One common use is to create *diff* or *patch* files.
+
+ - `diff file1.txt file2.txt`
+	- a description of the differences between the two files; each group of changes is preceded by a *change command* in the form of *range operation range*
+		- `r1ar2` - append the lines at position r2 in the second file to the position r1 in the first file
+		- `r1cr2` - change/replace the lines at position r1 in the first file with the lines at the position r2 in the second file
+		- `r1dr2` - delete the lines in the first file at position r1, which would have appeared at range r2 in the second file
+		- a range is a comma-separated list of starting line and ending line
+	- this format is the most POSIX compliant and backward compatible, but it is not widely used (more popular: *context format* and the *unifiied format*)
+ - `diff -c file1.txt file2.txt` (context format)
+	- the output format begins with the two file names plus timestamps and markers for each one; these markers are used in the listing that follow to identify the file which the change refers to (change groups)
+	- a change groups starts with the markers for one for the files, then the range of lines from that file; then each line begins with one indicator:
+		- blank - a line shown for context, does not indicate a difference
+		- `-` - a line deleted (will appear in the first file, but not ine second)
+		- `+` - a line added
+		- `!` - a line changed; the two version of the line will be displayed, each in its respective section of the change group
+ - `diff -u file1.txt file2.txt` (unified format)
+	- similar to the context format, but more concise
+	- the change groups describe lines in both files, so the duplicate context lines are shown only once
+	- a change group starts with a header that shows the lines in each files; then there are the lines themselves, with 3 lines of context by default; each line starts with
+		- blank - line shared by both files
+		- `-` - line was removed from the first file
+		- `+` - line was added to the first file
+
+*patch*
+
+The patch program accepts output from diff and is generally used to convert older version of files to newer ones, by applying the differences described in the diff/patch file.
+
+To prepare a diff file for use with patch, the GNU documentation suggests
+
+ - `diff -Naur old_file new_file > diff_file` (treat new files as empty, treat all files as text, unified format, recursive) - works for single files or directories
+ - `patch < diff_file` - we do not need to specify a target file as the diff file already contains the filenames.
+
+Patch has a large number of options and there are additional utility programs that can be used to analyze and edit patches.
+
+*Editing on the fly*
+
+**`<cmd: tr; sed;>`**
+
+*tr*
+
+The tr program *tranliterates* characters - changes them from one alphabet to another. Operates on stdin and outputs to stdout. 
+
+ - `echo "lowercase text" | tr a-z A-Z`
+	- the character sets arguments can be
+		- enumerated list `ABCDEFGHIJ`
+		- character range (subjec to same possible issues with ordering depending on locale)
+		- POSIX character classes like
+	- the sets can have unequal lenghts
+		- `echo "lowercase" | tr [:lower:] A` - will transform all chars in A's
+		- `echo "hello" | tr [a-e] [A-E]` - will yield "hEllo"
+
+It also has an option to delete characters from the input.
+
+ - `tr -d '\r' < dos_file.txt > unix_file.txt` - remove carriage returns from file
+
+A nice trick is to use tr for ROT13 encoding of text - move all letters 13 letters up in the alphabet, which is halfway. So the same transformation will give give back the original text.
+
+ - `echo "secret text" | tr a-zA-Z n-za-mN-ZA-M | tee secret.txt | tr a-zA-Z n-za-mN-ZA-M`
+
+tr can also "squeeze" repeating characters
+
+ - `echo "aaabbbccc" | tr -s ab` - will produce "abccc"
+
+*sed*
+
+The *stream editor* program is a powerful program for editing text from standard input or from a set of files. It can receive an editing command or the name of a script file with multiple commands, and it then performs the command on each line of the input.
+
+ - `echo "front" | sed 's/front/back/'` - "back" - substitutes front with back
+	- the stream "front" is fed into sed which received a single command as an argument
+	- a command starts with a single letter - type of command (s - substition), then the arguments for the command, separated by slash (or any other character)
+		- `s_front_back_` - same thing
+	- most commands can be preceded by an address - what line(s) are edited
+		- `1s/front/back/` - only line number 1
+		- `$` - the last line
+		- `/regexp/` - line matching a POSIX basic regular expression (to delimit the expression with another character c `\cregexpc`)
+		- `addr1,addr2` - range of lines, inclusive
+		- `first~step` - from line *first*, every *step* line
+		- `addr1,+n` - addr1 and the following n lines
+		- `addr!` - all excepts addr
+
+To print out only the first five lines of a file, we use the `p` command with a range address. The `-n` (no auto-print) option is required, otherwise sed will print all lines.
+
+ - `sed -n '1,5p' distros.txt`
+
+To print only some matching lines, we can use a regular expression
+
+ - `sed -n '/SUSE/p' distros.txt`
+ - `sed -n '/SUSE/!p' distros.txt` - only lines not matching
+
+Basic editing commands supported by sed (not only `s` and `p`)
+
+ - `=` - output line number
+ - `a` - append text after current line
+ - `d` - delete current line
+ - `i` - insert text in front of the line
+ - `p` - print current line (by default sed prints every line and only edits matching ones)
+ - `q` - exit sed without processing more lines; without -n, outputs the current line
+ - `Q` - exit sed
+ - `s/regexp/replacemen/` - replacement may include `&`, which is the text matched by regexp. Also it can include \1 to \9, subexpression in regexp. A further flag may be specified at the end to modify the command's behavior (most common, `g` to perform the substituion globally to a line, not only to the first match)
+ - `y/set1/set2` - preform transliteration of characters - sets must have same length (character ranges or classes are not supported)
+
+The `s` substitute command is the most used. For example, we can transform dates in format MM/DD/YYYY to YYYY-MM-DD
+
+ - `sed 's/\([0-9]\{2\}\)\/\([0-9]\{2\}\)\/\([0-9]\{4\}\)$/\3-\1-\2/' distros.txt`  
+   *(that is why regular expression are referred to as "write-only" - you can write them, but you can't read them)*
+
+In the example above, the *back-reference* feature of BREs which allows identifying subexpressions.
+
+Multiple commands can be specified:
+
+ - `sed -i 's/white/black/; s/up/down/' foo.txt`
+	- `-i[SUFFIX] / --in-place[=SUFFIX]` - edit files in place (makes backup if suffix is given) 
+
+To do more complex transformations with sed, a script can be used. For example, the following sed script will produce a report out of the distros file: a title at the top, changed dates formats and all names in uppercase.
+
+```
+# sed script to produce Linux distribution report
+
+1 i\
+\
+Linux Distribution Report\
+
+s/\([0-9]\{2\}\)\/\([0-9]\{2\}\)\/\([0-9]\{4\}\)$/\3-\1-\2/
+y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/
+```
+
+ - `sed -f distros.sed distros.txt`
+
+Comments and blank lines are for readability and maintainability. Line-continuation characters ('\' + newline) can be used to embed multiple lines.
+
+Note: `sed` is usually used for simple one-line tasks. For larger tasks, the most popular tools are `awk` and `perl`.
+
+*aspell*
+
+**`<cmd: aspell;>`**
+
+The aspell tool is an interactive spelling checker (successor of an earlier program, ispell). It is used usually by other programs that require spell checking, but can also be used stand-alone. It can intelligently check various types of text files, like HTML, C/C++ programs, email messages etc.
+
+ - `aspell check textfile.txt` - it will open an interactive menu for correcting misspelled words
+ - `aspell -H check index.html` - the HTML filter mode  makes checking usable for HTML files - processes only the non-markup parts plus the contents of ALT tags
+
+For other filter modes and options, see the documentation.
+
+*Resources*
+
+ - GNU coreutils
+ - GNU diffutils
+ - [sed one liners](http://sed.sourceforge.net/sed1line.txt)
+ - [sed big tutorial](http://www.grymoire.com/Unix/Sed.html)
+ - [shelldorado](http://www.shelldorado.com/links/index.html#tutorials)
+
+*Other programs*
+
+ - `split` - split a file into pieces
+ - `csplit` - split based on context
+ - `sdiff` - side-by-side merge of file differences
+
+
+
 
 
 
