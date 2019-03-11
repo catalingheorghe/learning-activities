@@ -1814,10 +1814,170 @@ For other filter modes and options, see the documentation.
  - `csplit` - split based on context
  - `sdiff` - side-by-side merge of file differences
 
+### Formatting output
 
+*Simple formatting tools* mostly one single job and are usually used in pipeline or scripts: nl, fold, fmt, pr, printf.
 
+**`<cmd: nl; fold; fmt; printf;>`**
 
+*nl - number lines*
 
+In its simplest use it just numbers lines, like `cat -n`. Like cat, it can accept multiple files or stdin (`-`).
 
+ - `nl distros.txt`
 
+However, nl supports a form of markup and some options that allow more complex numbering - "logical pages" with header, body and footer; all of these can start the numbering at different values and have different format styles.
+
+ - `\:\:\:` - start of logical page header
+ - `\:\:` - start of logical page body
+ - `\:` - start of logical page footer
+
+A markup element must appear alone on its own line; after nl processes it, it deletes it from the stream.
+
+Options
+
+ - `-b / -f / -h style` - body / footer / head numbering style: `a` number all lines, `t` only non-blank lines, `n` none, `p<regexp>` only lines matching
+ - `-i number` - page numbering increment
+ - `-n format` - left justified (1n), right justified (rn), right justified with leading zeros (rz)
+ - `-p` - do not reset page numbering at the beginning of each logical page
+ - `-s string` - add string after each line number; by default a tab
+ - `-v number` - first line number of each logical page
+ - `-w width` - width of line number field
+
+To further the work with the Linux distributions report we can use a sed script to add header, body and footer markups and then call nl to number the relevant lines.
+
+```
+1 i\
+\\:\\:\\:\
+\
+Linux Distributions Report\
+\
+Name	Ver. Released\
+----	---- --------\
+\\:\\:
+s/\([0-9]\{2\}\)\/\([0-9]\{2\}\)\/\([0-9]\{4\}\)$/\3-\1-\2/
+$ a\
+\\:\
+\
+End Of Report
+```
+
+Now we can produce an enhanced report
+
+ - `sort -k 1,1 -k 2n distros.txt | sed -f distros-nl.sed | nl` - or `nl -w 3 -n rz -s ' - '`
+
+*fold - wrap lines*
+
+Folding is the process of breaking lines of text at a specified width (default 80).
+
+ - `echo "The quick brown fox jumbed over the lazy dog" | fold -w 12` - it does not take into account work boundaries
+	- `-s` - preserve word boundaries (break at last available space before the width)
+
+*fmt - simple text formatter*
+
+The fmt program also folds text, but it also does paragraph formatting. Take as an example a part of the fmt man - fmt-info.txt.
+
+ - `format -w 50 fmt-info.txt` - will give out a bit awkaward result, since the indentation of lines are preserved by default, even if broken up
+ - `format -cw 50 fmt-info.txt` - will make the result look ok
+	- `-c` - *crown margin* mode - preserves the indentation of the first two lines; following lines will have the indentation of the second line
+	- `-p string` - format only the lines that start with string and prepend the string to newly formatted lines; useful for formatting source code comments
+	- `-s` - split only mode; shorter lines will not be joined (can be useful for formatting code)
+	- `-u` - perform uniform spacing: one space between words, two between sentences; can be useful for removing padding from justification
+	- `-w width` - defautl 75; fmt actually formats lines slighty shorter to allow for line balancing.
+ - `format -w 50 -p '# ' some-code.txt` - will only format lines starging with '# ', comments in many programming languages
+
+*pr - format text for printing*
+
+The pr program is used to paginate text. When printing text is is often desirable to separate the pages of output with several lines of whitespace, to provide a margin or place for a header and footer.
+
+ - `pr -l 15 -w 65 distros.txt`
+	- `-l number` - page length (number of lines in a page)
+	- `-w number` - page width (number of columns in a page)
+	- it will add some extra lines and a default header - all can be adjusted via options
+
+*printf - format and print data*
+
+The printf program does not accept standard input; it is not often used on the command line, mostly in scripts. It comes from C and is implemented in many programming languages, including in the shell its-self as a builtin.
+
+ - `printf "format" arguments...`
+ - `printf "string: %s\n" foo` - the sequences starting with `%` are called *conversion specifiers*
+	- `d` - format a number as a signed decimal integer
+	- `f` - format and output a floating-point number
+	- `o` - octal number
+	- `s` - string
+	- `x` - hex number, lowercase
+	- `X` - hex number, uppercase
+	- `%` - the literal `%`
+ - `printf "%d, %f, %o, %x, %X, %s" 380 380 380 380 380 380`
+
+A complete converstion specifier has the form
+
+ - `%[flags][width][.precision]conversion_specifier`
+	- flags:
+		- `#` - use the "alternate output" for output - varies by datatype; for hex it means prefixed with 0x or 0X
+		- `0` - pad with leading zeros
+		- `-` - left-align the output (default is right-align)
+		- ` ` - add a leading space for positive numbers
+		- `+` - sign positive numbers
+	- width - number specifying the minimum field width
+	- .precision - for floating-point numbers, the number for decimal; for sting, the number of characters of output
+
+*Document formatting systems*
+
+UNIX was used in scientific and academic centers, so it made sense to offer tools that could be used to produce many types of documents, especially academic.
+
+The developers working on UNIX justified requesting a new PDP-11 by implementing a document formatting system for AT&T patents division. The program was a reimplementation of `roff`. This was year 1971.
+
+Two main families dominate the field: those descended from `roff` (including `nroff` and `troff`) and those base on Donald Knuth's TeX ("tek") typesetting system.
+
+The `nroff` program is used to format documents for output to devices that use monospace fonts (character terminals, typewriter-stype printers). The program `troff` formats documents for output on *typesetters*, devices used to produce camera-ready type for commercial printing. Most computer printers today are like typesetters. The roff family of programs include `eqn` (for equations) and `tbl` (for tables).
+
+The TeX system appeared later, 1989, and displaced troff at the tool of choice. It is complex and not installed by default. (tip: texlive package, LyX graphical content editor).
+
+**`<cmd: groff; ps2pdf; tbl;>`**
+
+`groff` is a suite of programs containing the GNU implementation of troff. It can also emulate the rest of the roff family.
+
+The way roff-like programs work is to format documents using a markup language. The modern analog for this would be the web page, HTML. The details are not worth going into, but groff offers *macro packages* that expose a smaller set of high-level commands. One macro packae still in wide use is the one for man pages documentation.
+
+Man documentation is stored in `/usr/share/man` as gzip compressed text files. The man pages shown by the man program are rendered with groff with the mandoc package.
+
+ - `zcat /usr/share/man/man1/ls.1.gz`
+ - `zcat /usr/share/man/man1/ls.1.gz | groff -mandoc -T ascii`
+	- the default output for groff is PostScript (-T ascii changes that)
+	- `groff -mandoc > ~/Desktop/ls.ps` will produce a file that can be opened by a graphical page viewer
+	- `ps2pdf ls.ps ls.pdf` - PostScript can be easily be converted to PDF
+		- `ls /usr/bin/*[[:alpha:]]2[[:alpha:]]*` - conversion programs; also "formattoformat"
+
+*PostScript is a page description language that is used to describe the contents of a printed page to a typesetter-like device. ps2pdf is part of the ghostscript package, the most Linux systems that support printing have installed.*
+
+To form a table for typesetting we can use `tbl`. Using sed we can add markup *requests* to distros.txt.
+
+```
+# sed script to produce Linux distributions report
+
+1 i\
+.TS\
+center box;\
+cb s s\
+cb cb cb\
+l n c.\
+Linux Distributions Report\
+=\
+Name	Version	Released\
+_
+s/\([0-9]\{2\}\)\/\([0-9]\{2\}\)\/\([0-9]\{4\}\)$/\3-\1-\2/
+$ a\
+.TE
+```
+ - `sort -k 1,1 -k 2n distros.txt | sed -f distros-tbl.sed | groff -t -T ascii`
+	- `-t` - process the stream with tbl
+ - without -T, groff will produce a PostScript document that looks better when opened with a graphical viewer
+
+*Resources*
+
+ - [groff user guide](http://www.gnu.org/software/groff/manual/)
+ - [writing papers with nroff using -me](http://docs.freebsd.org/44doc/usd/19.memacros/paper.pdf)
+ - [tbl program](http://plan9.bell-labs.com/10thEdMan/tbl.pdf)
+ - "drawing with pic"
 
