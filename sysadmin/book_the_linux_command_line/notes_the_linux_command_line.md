@@ -1818,7 +1818,7 @@ For other filter modes and options, see the documentation.
 
 *Simple formatting tools* mostly one single job and are usually used in pipeline or scripts: nl, fold, fmt, pr, printf.
 
-**`<cmd: nl; fold; fmt; printf;>`**
+**`<cmd: nl; fold; fmt; pr; printf;>`**
 
 *nl - number lines*
 
@@ -1980,4 +1980,124 @@ $ a\
  - [writing papers with nroff using -me](http://docs.freebsd.org/44doc/usd/19.memacros/paper.pdf)
  - [tbl program](http://plan9.bell-labs.com/10thEdMan/tbl.pdf)
  - "drawing with pic"
+
+### Printing
+
+We will look at command line tools to print files and control printer operation. Configuring and seting up a printer is out of scope, as it varies by configuration to configuration.
+
+*A brief history of printing*
+
+As mainframe computers where shared, users connecting to them via terminals, so where printers, which were attached to those large computers. To identify print jobs from a particular user, a *banner* page was oftern printed at the beginning of each print job. Then the computer support staff would deliver the prints to the people.
+
+First printes where *impact printers*, mechanically forming impressions on the paper. Most common types where *daisy-wheel* and *dot-matrix*. The font was monospace; printing was done at fixed positions on the page and the printable area was fixed. Most printers did 10 CPI, charactes per inch, and 6 LPI (lines per inch). That means that the US-letter sheet of paper (format popular in US, a bit different than A4) is 85 characters by 66 lines. Taking into account a small margin on each syde, you get 80 characters. So using a terminal with 80 chars width you get a WYSIWYG editor.
+
+Data is sent to a typewriter-like printer in a stream of bytes - ASCII codes for characters and for control characters. Some limited effects can be achieved: like using backspace (Ctrl-h, ^H) to go back, print the char again, for a more bolded impression.
+
+The development of GUIs led to major changes in printer technology, which moved from character-based to graphical techniques. This was made possible by the laser printer, which could print tiny dots anywher in the printable area (proportional fonts like in typesetters, diagrams, pictures). The amount of information to describe a page for a 300DPI (dots per inch) printer was almost 20 times higher than for a character-based printer. A new way was invented to descibe the information: PDL (Page Description Language). The first major one was PostScript. The interpretation of PostScript program was embeded in the printers, which accepted as input a PostScript program - page descriptions. The printer had a processor and memory for executing the PostScript interpreter that produced the large bit pattern (dots) for a page (*bitmap*) - this process is called *raster image processor*.
+
+With time, the RIP moved from printers to host computers. Many printers still accept character-based streams, but many do not. They except the stream of bits to print as dots. Some printers stil are PostScript printers.
+
+*Printing with Linux*
+
+Two suites are involved
+
+ - CUPS (Common Unix Printing System) - print drivers and print-job management (using print queues)
+ - Ghostscript - PostScript interpreter (acts as a RIP)
+
+**`<cmd: pr; lpr; lpstat; lp; a2ps;>`**
+
+pr is used to adjust text to fit on a specific page size, with optional page headers and margins
+
+ - `ls /usr/bin | pr -3 -w 65` - format out on a 65 wide page and organize the content on 3 columns
+	- `+first[:last]` - limit output to a range of pages
+	- `-columns_number`
+	- `-a` - for mutlicolumn, list output horizontally (across)
+	- `-d` - double space output
+	- `-D "format"` - format of the date in th eheader (man date)
+	- `-f` - use form feeds to separate pages
+	- `-h "header_text"` - use this text in the central position of the header
+	- `-l lenght` - page length (default 66)
+	- `-n` - number lines
+	- `-o offset` - left margin ofsset, in characters
+	- `-t` - skip header and footer
+	- `-w width` - page width (default 72)
+
+To send a job to a printer, one method is `lpr` (Berkeley), the other `lp` (SysV). They do roughly the same thing.
+
+ - `ls /usr/bin/ | pr -3 | lpr`
+ - `lpr -P printer file` - you can specify a printer
+	- `-# number` - no. of copies
+	- `-p` - print each page with a shaded header
+	- `-P printer`
+	- `-r` - delete after printing
+ - `lpstat -a` - list of printers known by the system
+
+System V Style is `lp`. It has a bit more sophisticaded option set
+
+ - `ls /usr/bin | pr -4 -w 90 -l 88 | lp -o page-left=36 -o cpi=12 -o lpi=8`
+	- `-d printer`
+	- `-n num_copies`
+	- `-o landscape`
+	- `-o fitplot` - scale the file to fit the page
+	- `-o scaling=number` - scale file; 100 is full page
+	- `-o cpi=number`
+	- `-o lpi=number`
+	- `-o page-bottom=points | page-left | page-right | page-top` - 72 points in an inch
+	- `-P pages` - list of pages, comma separated, ranges allowed
+
+The program `a2ps` is now *anything to PostScript*. It sends its default output to the system's default printer, not to stdout. It improves the appearence of output ("pretty printer").
+
+ - `ls /usr/bin | pr -3 -t | a2ps -o ~/Dekstop/ls2.ps -L 66`
+	- `--center-title=text` - set center page title to text
+	- `--columns=number` - default is 2; arrange pages into columns
+	- `--footer=text` - text in page footer
+	- `--guess` - report the types of files given as arguments
+	- `--left-footer=text`
+	- `--left-title=text`
+	- `--line-numbers=interval` - number lines of output every interval lines
+	- `--list=defaults` - display default settings
+	- `--pages=range` - print pages in range
+	- `--right-footer=text`
+	- `--right-title=text`
+	- `--rows=number` -arrage pages into number rows, defaul is 1
+	- ... font size, line number, characters per line, tab width, landscape, portrait, watermark
+
+There is another similar program *enscript* that converts text to PostScript, but accepts only text input.
+
+*Monitoring and Controlling Print Jobs*
+
+CUPS is designe to handle multiple print jobs from multiple users. Each printer is given a *print queue* where jobs are waiting to be *spooled* to the printer.
+
+*lpstat - display print system status*
+
+The use is to determine the names an availability of printers on the system.
+
+ - `lpstat -a [printer]` - printer queues status
+	- `-s` - more detailed description, including device for the printer
+	- `-r` - status of print server
+	- `-d` - name of default printer
+	- `-t` - complete status report
+
+*lpq - display printer queue status*
+
+The lpq program shows the status and contents of the printer queues (print jobs).
+
+To cancel print jobs and remove them from queues the programs to use are `lprm` (Berkeley style) and `cancel` (System V). 
+
+ - `ls *.txt | pr -3 | lp`
+ - `lpq`
+ - `cancel 603`
+ - `lpq`
+
+*Resources*
+
+ - wikipedia: PostScript, CUPS, Berkeley printing system, System V printing system
+
+
+
+
+
+
+
+
 
