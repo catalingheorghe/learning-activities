@@ -2078,11 +2078,11 @@ The use is to determine the names an availability of printers on the system.
 	- `-d` - name of default printer
 	- `-t` - complete status report
 
-*lpq - display printer queue status*
+*lpq, lprm, cancel - display printer queue status and cancel jobs*
 
-The lpq program shows the status and contents of the printer queues (print jobs).
+**`<cmd: lpq; lprm; cancel;>`**
 
-To cancel print jobs and remove them from queues the programs to use are `lprm` (Berkeley style) and `cancel` (System V). 
+The lpq program shows the status and contents of the printer queues (print jobs). To cancel print jobs and remove them from queues the programs to use are `lprm` (Berkeley style) and `cancel` (System V). 
 
  - `ls *.txt | pr -3 | lp`
  - `lpq`
@@ -2093,10 +2093,45 @@ To cancel print jobs and remove them from queues the programs to use are `lprm` 
 
  - wikipedia: PostScript, CUPS, Berkeley printing system, System V printing system
 
+### Compiling programs
 
+Compiling programs from source is a big part of Unix and Linux way of thinking. However, now distribution maintainers keep huge repositories of precompiler binaries. Nevertheless, compiling from source still has reasons: availability (not all distributions package all programs) and timeliness (most distributions do not compile the laster version).
 
+Compiling means translating *source code* into *machine language* (numeric code - instructions expressed in binary). The next level over machine code is assembly language - character mnemonics for the CPU instructions. The assembler transforms assembly language into machine language. Above this come the *high-level programming languages* - hide the details of what the process is doing: FORTRAN, COBOL, C, C++ etc. The *compiler* turns this higher level source code into machine code. Some compilers translate into assembly language and then use an assembler.
 
+*Linking* is also an important part. Libraries provide support for common tasks. Usual folders: `/lib`, `/usr/lib` - the linker program forms connections between the output of the compiler and the libraries required by that program. The final result is an *executable program file*.
 
+Some programs don't require compiling. They are interpreted (Perl, Python, PHP, Ruby, shell etc). They are usually slower, but are easier to develop.
+
+*Compiling a C program from source*
+
+Download souce code archive for `diction` program - a spell and style checker.
+
+ - `mkdir src; cd src`
+ - `ftp ftp.gnu.org`
+	- anonymous
+	- cd gnu/dictions
+	- get diction-1.11-tar-gz
+	- bye
+ - wget https://ftp.gnu.org/gnu/diction-1.1.tar.gz
+ - tar xzf diction-1.1.tar.gz
+
+GNU Project programs contain files like README, INSTALL, NEWS, COPYING. Before building, README and INSTALL should be read.
+
+Header files installed with the compiler are usually put in `/usr/include/` (stdion.h, unistd.h, stdlib.h etc).
+
+Building the program is usually a simple two step process
+
+ - `./configure` - shell script that analyzes the build environment (adjustments to source code for different Unix types; check for external tools and components)
+ - `make` - the make program run according to the Makefile created previously by the configure script; formed of targets and their dependencies, and instructions how to build the targets. It keeps the targets up-to-date on every run, but only the ones that are required, that have a changed dependency
+
+Installing the program is equally simple, for packages that provide the de-factor make special target
+
+ - `sudo make install` - the system directory for installation is usually `/usr/local/bin` (not writable but regular users)
+
+*Resources*
+
+ - [GNU Make manual](http://www.gnu.org/software/make/manual/html_node/index.html)
 
 
 
