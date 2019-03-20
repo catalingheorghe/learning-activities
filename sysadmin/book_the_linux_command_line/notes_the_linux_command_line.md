@@ -8,6 +8,7 @@ William Shots
 1. Shell notes and Linux intro
 2. Configuration and the environment
 3. Common tasks and essential tools
+4. Writing shell scripts
 
 ## 0. About
 
@@ -684,17 +685,19 @@ nano was designed as a small text editor for an email client, so it does not hav
 Example of possible additions to .bashrc
 
 ```
+
     # Change umask to make directory sharing easier
     umask 0002
-
+    
     # Ignore duplicates in command history and increase
     # history size to 1000 lines
     export HISTCONTROL=ignoredups
     export HISTSIZE=1000
-
+    
     # Add some helpful aliases
     alias l.='ls -d .* --color=auto'
     alias ll='ls -l --color=auto'
+
 ```
 
 To take effect, either start a new terminal session, or instruct bash to reread the modifications by `source ~/.bashrc`.
@@ -1773,14 +1776,16 @@ Multiple commands can be specified:
 To do more complex transformations with sed, a script can be used. For example, the following sed script will produce a report out of the distros file: a title at the top, changed dates formats and all names in uppercase.
 
 ```
-# sed script to produce Linux distribution report
 
-1 i\
-\
-Linux Distribution Report\
+    # sed script to produce Linux distribution report
+    
+    1 i\
+    \
+    Linux Distribution Report\
+    
+    s/\([0-9]\{2\}\)\/\([0-9]\{2\}\)\/\([0-9]\{4\}\)$/\3-\1-\2/
+    y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/
 
-s/\([0-9]\{2\}\)\/\([0-9]\{2\}\)\/\([0-9]\{4\}\)$/\3-\1-\2/
-y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/
 ```
 
  - `sed -f distros.sed distros.txt`
@@ -1847,19 +1852,21 @@ Options
 To further the work with the Linux distributions report we can use a sed script to add header, body and footer markups and then call nl to number the relevant lines.
 
 ```
-1 i\
-\\:\\:\\:\
-\
-Linux Distributions Report\
-\
-Name	Ver. Released\
-----	---- --------\
-\\:\\:
-s/\([0-9]\{2\}\)\/\([0-9]\{2\}\)\/\([0-9]\{4\}\)$/\3-\1-\2/
-$ a\
-\\:\
-\
-End Of Report
+
+    1 i\
+    \\:\\:\\:\
+    \
+    Linux Distributions Report\
+    \
+    Name	Ver. Released\
+    ----	---- --------\
+    \\:\\:
+    s/\([0-9]\{2\}\)\/\([0-9]\{2\}\)\/\([0-9]\{4\}\)$/\3-\1-\2/
+    $ a\
+    \\:\
+    \
+    End Of Report
+
 ```
 
 Now we can produce an enhanced report
@@ -1954,22 +1961,25 @@ Man documentation is stored in `/usr/share/man` as gzip compressed text files. T
 To form a table for typesetting we can use `tbl`. Using sed we can add markup *requests* to distros.txt.
 
 ```
-# sed script to produce Linux distributions report
 
-1 i\
-.TS\
-center box;\
-cb s s\
-cb cb cb\
-l n c.\
-Linux Distributions Report\
-=\
-Name	Version	Released\
-_
-s/\([0-9]\{2\}\)\/\([0-9]\{2\}\)\/\([0-9]\{4\}\)$/\3-\1-\2/
-$ a\
-.TE
+    # sed script to produce Linux distributions report
+       
+    1 i\
+    .TS\
+    center box;\
+    cb s s\
+    cb cb cb\
+    l n c.\
+    Linux Distributions Report\
+    =\
+    Name	Version	Released\
+    _
+    s/\([0-9]\{2\}\)\/\([0-9]\{2\}\)\/\([0-9]\{4\}\)$/\3-\1-\2/
+    $ a\
+    .TE
+
 ```
+
  - `sort -k 1,1 -k 2n distros.txt | sed -f distros-tbl.sed | groff -t -T ascii`
 	- `-t` - process the stream with tbl
  - without -T, groff will produce a PostScript document that looks better when opened with a graphical viewer
@@ -2125,13 +2135,181 @@ Building the program is usually a simple two step process
  - `./configure` - shell script that analyzes the build environment (adjustments to source code for different Unix types; check for external tools and components)
  - `make` - the make program run according to the Makefile created previously by the configure script; formed of targets and their dependencies, and instructions how to build the targets. It keeps the targets up-to-date on every run, but only the ones that are required, that have a changed dependency
 
-Installing the program is equally simple, for packages that provide the de-factor make special target
+Installing the program is equally simple, for packages that provide the de-facto make special target
 
  - `sudo make install` - the system directory for installation is usually `/usr/local/bin` (not writable but regular users)
 
 *Resources*
 
  - [GNU Make manual](http://www.gnu.org/software/make/manual/html_node/index.html)
+
+## 4. Writing Shell Scripts
+
+### First script - basics
+
+At its simplest, a shell script is a file consisting of a series of commands. The shell is both an interface to the system and a scripting language interpreter.
+
+Basics (formatting, executable permissions, location)
+
+ - first line of a script starts with the *shebang* - `#!`; it tells the kernel the name of the interpreter to use
+ - comments start with `#` and can be also at the end of a line
+ - must have executable permissions (`chmod 755 script`)
+	- usually `755` for scripts that everyone can execute
+	- `700` for scripts that only the owner can execute
+ - the location of the script must be in PATH to execute it without giving the path to it; note that `~/bin`, if existing, is part of the PATH (it is added at login, or in a login shell `su - $username`)
+	- `~/bin` - good location for personal use scripts
+	- `/usr/local/bin` - a script that everyone on the system is allowed to use
+	- `/usr/local/sbin` - script intended for use by the system administrator (locally supplied software, scripts or compile program should go under `/usr/local`, not `/bin` or `/usr/bin` - these are specifed by the Linux Filesystem Hierarchy Standard to contain files supplied and maintained by the Linux distributor)
+
+Note: to make the shell read a file and execute the commands in it, like they were given from the keyboad: `source` or `.` (shell builtin). One example would be modified `.bashrc` or similar and wanting the modifications in the current session, you can just source it.
+
+Making a script easy to read and modify is very important for making it useful (maintainability)
+
+ - usage of long options (e.g. `ls --all --directory` in a script) can provide improved readability
+ - by using indentation and continuation (backslahs-linefeed sequence), long commands can be made very readable
+    - this can also be done on the command line, but it is hard to type. Also, tabs can't be used for indentation on the command line, they are used to activate completion
+
+```  
+
+    find p \( -type f -not -perm 0600 -exec chmod '{}' ';' \) or \( -type d -not -perm 0700 -exec chmod 0700 '{}' ';' \)
+    
+    find p \
+        \( \
+            -type f \
+            -not -perm 0600 \
+            -exec chmod 0600 '{}' ';' \
+        \) \
+        -or \
+        \( \
+            -type d \
+            -not -perm 0700 \
+            -exec chmod 0700 '{}' ';' \
+        \)
+
+```
+
+Vim for writing scripts
+
+ - `:syntax on` (full version of vim and a shebang in the script; with no shebang: `set syntax=sh`)
+ - `:set hlsearch`
+ - `:set tabstop` - number of characters occupied by a tab character; default is 8; this allows longer lines to fit easier on the screen and is a common practice
+ - `:set autoindent` (to stop indentation press `Ctrl-d`)
+
+Note: these changes can be made permanent by adding them to your `~/.vimrc` file
+
+### Starting a project
+
+Project purpose: build a *good* program. Program purpose: produce reports in HTML about our system (status and statistics).
+
+First stage is to output a minimal HTML document, that can then be opened with a web browser.
+
+ - `sys_info_page > sys_info_page.html`
+ - `firefox sys_info_page.html` (or `file://path_to_html` in browser URL)
+
+Multiline echo makes it easier to read and modify. Quoated strings may include newlines. This works both on scripts and on the CLI. On the CLI, when a quoted string is started, the character on the next lines comes from the shell prompt in the `PS2` variable (`>`).
+
+**Variables**
+
+Variables are created by the shell when they are encountered.
+
+ - `title="System Information Report"`
+ - `echo "... <title>$title</title> ..."` 
+    - *parameter expansion* lets you use the content of the variable
+
+The lax way in which the shell handles variables can lead to problems
+
+ - `echo $foo1` - "foo1" variable was not encountered before (spelling error: it should have been "foo")
+    - the shell will create it on the fly and give it the default value of nothing/empty
+    - echo will just print a newline, no warning
+
+Naming conventions
+
+ - alphanumeric characters and underscore
+ - first character must be a letter or and underscore
+ - no spaces or punctuation marks
+
+additionally, variables that are intended to remain constant (like the value of PI), are often given uppercase names, while varibales whose content is intended to be changed use lowercase. Note that the shell does provide a way to enforce the immutability of constants, by using the builtin `declare`
+
+ - `declare -r TITLE="Page Title for $HOSTNAME`
+    - `-r` - read-only; shell would prevent subsequent assignments; rarely used, only in very formal scripts
+    - $HOSTNAME is a shell variable with the network name of the machine
+
+All values assigned to variables are treated as strings (`declare -i` can restrict the assignment to integers, but it is rarely done). No space between `variable=value`.
+
+ - `a=z`
+ - `b="a string"    # Quotes required for the space`
+ - `c= a and $b"    # Can contain other expansions`
+ - `d=$(ls -l foo.txt)    # Output of a command`
+ - `e=$((5 * 7))    # Arithmetic expansion
+ - `f="\t\a string\n"     # Escape sequences
+ - `a=3 b="a string"`     $ Multiple assignment on same line
+
+During expansion, variable name may be surrounded by curly braces: `mv "$filename" "${filename}1"`.
+
+A good practice is to enclose variables and command substitutions in double quotes, to limit the effect of word-splitting by the shell.
+
+**Here Documents**
+
+Here documents is another way of writing multiline strings. The usual marker used is `_EOF_`. In here documents, quotes can be used freely. 
+
+```
+
+    command << token
+    text
+    token
+
+```
+
+In order to ignore a leading tab character (not space) we can usa `<<-`, instead of `<<`; this does not skip spaces, which may be a problem if tabs are expanded.
+
+*Resources*
+
+ - [HTML tutorial](http://html.net/tutorials/html/)
+ - man bash page - HERE DOCUMENTS
+
+### Top-Down Design
+
+Identifying the top-leve steps and developing increasingly detailed views of those steps is *top-down design*.
+
+**Shell Functions**
+
+Commands called in a script can be commands that are available in the CLI or can be small mini-scripts in our program - shell functions.
+
+Syntactic forms:
+
+```
+
+    function name {
+        commands
+        return
+    }
+
+    # Or simpler and genrally preferred form
+
+    name () {
+        commands
+        return
+    }
+
+```
+
+For function calls to not be interpreted as external commands, the shell functions must appear before they are called in the script. 
+
+The `return` command is optional at the end; it terminates the function and returns control to the line with the function call. A functions must have at least one command.
+
+Function names follow the same rules as variable names.
+
+**Local variables**
+
+Local variables are only accesible within the shell function. Names can already exist, globally or in other functions - there are no conflicts.
+
+ - `local foo`
+
+Note that shell functions make great replacements for aliases. A shell function can go `.bashrc` and then it can executed easily from the CLI.
+
+
+
+
 
 
 
