@@ -2307,6 +2307,164 @@ Local variables are only accesible within the shell function. Names can already 
 
 Note that shell functions make great replacements for aliases. A shell function can go `.bashrc` and then it can executed easily from the CLI.
 
+### Flow Control - Branching with if
+
+Some scripts should behave differently, for example in order to adapt to the privileges of the user running the script. We need the proram to *branch*.
+
+```
+
+    x=5
+    if [ "$x" -eq 5 ]; then
+        echo "x equals 5"
+    else
+        echo "x does not equal 5"
+    fi
+
+    # General form
+    if commands; then
+        commands
+    [elif commands; then
+        commands...]
+    [else
+        commands]
+    fi
+
+```
+
+What is evaluated is the *exit status* of a command, that is the condition for the if test. The range is 0 - 255, where only 0 indicates success. The shell provides a parameter to see the exit status of the previous command: `$?`
+
+ - `ls -d "/usr/bin"`
+    - `echo $?` - should be 0 in this case
+ - `ls -d "/bin/usr"`
+    - `echo $?` - should be != 0
+ 
+Two simple shell builtin commands simply terminate with either 0 or 1: `true` and `false`.
+
+If a list of commands follows `if`, then the last command is evaluate
+
+ - `if true; false; then echo "True"; fi` - will output nothing (false)
+
+A script can be terminated at any time with the `exit` command. Can take an optional argument for the exit status value; if no argument is given it uses the exit status of the last command executed.
+
+Similarly, a shell function can return a value via the `return` command.
+
+**test**
+
+The most common command used in the if clause is the `test` command
+
+ - `test expression`
+ - `[ expression ]` - the more popular form
+
+The test command returns an exit status of 0 if the expression is true, or 1 if the expression is false.
+
+*Note: both `test` and `[` are actually commands. In bash they are shell builtins, but they also exist as programs in `/usr/bin` for use with other shells. For `[`, the expression is actually just its arguments, and the `]` needs to be the last argument.*
+
+Supported expressions and tests:
+
+ - file expressions
+    - `file1 -ef file2` - same inode number, they are hardlinks
+    - `file1 -nt file2` - newer than
+    - `file1 -ot file2` - older than
+    - `-b file` - exists and is a block device file
+    - `-c file` - character device fie
+    - `-d file` - directory
+    - `-e file` - file exists
+    - `-f file` - regular file
+    - `-g file` - set-group-ID
+    - `-G file` - is owned by the effective group ID
+    - `-k file` - sticky bit
+    - `-L file` - symlink
+    - `-O file` - is owned by the effective user ID
+    - `-p file` - named pipe
+    - `-r file` - read permissions of the effective user
+    - `-s file` - length greater than zero
+    - `-S file` - socket
+    - `-t fd`   - fd iss a file descriptor directed to/from the terminal (can be used to see if stdin/out/err are being redirected)
+    - `-u file` - setuid
+    - `-w file` - writable for effective user
+    - `-x file` - executable for effective user
+
+The proper/safe way to specify a file path is by quoting it: `if [ -f "FILE" ]; then echo "it is a file"; fi`
+
+ - string expressions
+    - `string` - string is not null
+    - `-n string` - len greater than zero
+    - `-z string` - len is zero
+    - `string1 = string2`, `string1 == string2` - strings are equal. The == is supported by bash and generally preffered, but not POSIX compliant
+    - `string1 != string2` - different strings
+    - `string1 > string2` - string1 sorts after string2
+    - `string1 < string2` 
+
+WARNING: the `<, >` operators must quoted or escaped with backslash, in order to not interpret them. Also, until 4.1, bash sorted in ASCII order, not conforming to the collation of the current locale.
+
+ - integer expressions (to compare values as integers, not as strings)
+    - `int1 -eq int2`
+    - `int1 -ne int2`
+    - `int1 -le int2`
+    - `int1 -lt int2`
+    - `int1 -ge int2`
+    - `int1 -gt int2`
+
+Example: `if [ $((INT % 2)) -eq 0 ]; then echo "INT is even"; fi`
+
+**A more modern version of test**
+
+Modern versions of bash add a compound command that does everything that `test` does
+
+ - `[[ expression ]]`
+ - `type [[` - "is a shell keyword"
+
+It adds an important new string expression:
+
+ - `string1 =~ regex` - true if string1 is matched by the extended regular expression
+
+This opens up a lot of possibilities for data validation. For example, to check if a variable contains an integer before using it in an integer expression.
+
+ - `if [[ "$INT" =~ ^-?[0-9]+$ ]]; then if [ "$INT" -eq 0 ]; then echo "INT is zero"; fi; fi`
+
+Another feature of `[[ ]]` is that the `==` operator supports pattern matching like pathname expansion does, which makes it useful for evaluating file and pathnames.
+
+ - `FILE=foo.bar; if [[ "$FILE" == foo.* ]]; then echo "matches 'foo.*'"; fi`
+
+**(( )) for integers**
+
+Bash provides the `(( ))` compound command for operating on integers. It performs an *arithmetic truth test* - true if the evaluation is non-zero.
+
+ - `if ((INT == 0)); then echo "INT is zero"; fi`
+ - `if ((INT % 2 == 0)); then "INT is even"; fi`
+
+Because it is part of the shell syntax, it is able to recognize variables by name, it does not require parameter expansion to be performed.
+
+**Combining expressions**
+
+Similar to tests for the `find` commands, expressions can be combined with AND, OR, NOT. `test` and `[[ ]] / (( ))` use different operators:
+
+ - AND, OR, NOT: `-a -o !` / `&& || !`
+
+Example:
+
+ - `if [[ "$INT" -ge 10 && "$INT" -lt 20 ]]; then echo "in range"; fi`
+ - `if [ ! \( "$INT" -ge 10 -a "$INT" -lt 20 \) ]; then echo "out of range"; fi`
+
+Note: `test` is traditional and part of the POSIX specification for standard shells, which are often used to run system startup scripts. `[[ ]]` is specific to bash and other modern shells - it should be used in writing modern scripts.
+
+Note: "real" UNIX people value portability very much (especially after what happened to UNIX world before POSIX was introduced). That means to stick with the "lowest commond denominator" for shell programming, which for shell programming would mean making everything compatible with `sh`, the original Bourne shell, which  prevents progress. Proprietary software vendors use this pretext to justify their proprietary extensions, which are basically a lock-in. The GNU tools, such as `bash` , don't restrict you; they support standards for portability and are universally available.
+
+**Control operators - another way to branch**
+
+ - `command1 && command2`
+    - command1 is executed and, only if it is successful, will command2 be executed
+ - `command1 || command2`
+    - command2 is executed if and only if command1 is unsuccessful
+
+For example, to exit a script (or a shell session) if a dir does not exist
+
+ - `[ -d temp ] || exit 1`
+
+*Resources*
+
+ - bash man page: "Lists", "Compound Commands", "CONDITIONAL EXPRESSIONS", "SHELL BUILTIN COMMANDS"
+
 
 
 
