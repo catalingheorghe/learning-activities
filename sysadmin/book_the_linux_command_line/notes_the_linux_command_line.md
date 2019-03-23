@@ -2305,7 +2305,7 @@ Local variables are only accesible within the shell function. Names can already 
 
  - `local foo`
 
-Note that shell functions make great replacements for aliases. A shell function can go `.bashrc` and then it can executed easily from the CLI.
+Note that shell functions make great replacements for aliases. A shell function can go in `.bashrc` and then it can executed easily from the CLI.
 
 ### Flow Control - Branching with if
 
@@ -2464,6 +2464,153 @@ For example, to exit a script (or a shell session) if a dir does not exist
 *Resources*
 
  - bash man page: "Lists", "Compound Commands", "CONDITIONAL EXPRESSIONS", "SHELL BUILTIN COMMANDS"
+
+### Reading Keyboard Input
+
+**read - read values from stdin**
+
+The `read` command is a shell builtin that read a single line of standard input. It can read data from standard input, or if redirected, from a file.
+
+ - `read [-options] [variable...]`
+    - it can handle one or more variables to hold the input value (it assigns fields from stdin to the specified variables)
+    - if no variable is given, the shell variable REPLY will be used
+
+Handling multiple values
+
+```
+
+   echo -n "Enter one or more values > "
+   read var1 var2 var3 var4 var5
+
+   echo "var1 = '$var1'"
+   echo "var2 = '$var2'"
+   echo "var3 = '$var3'"
+   echo "var4 = '$var4'"
+   echo "var5 = '$var5'"
+
+```
+
+If "a b c d e" is given, all variables will have a value. If "a" is given, all variables except var1 will be empty. If "a b c d e f g" is given, var5 will be 'e f g'.
+
+Options
+
+ - `-a array` - assign input to an array, starting with index 0
+ - `-d delimiter` - first char is used to indicate the end of input, not a newline character
+ - `-e` - use readline to handle input; this permit input editing like on the command line
+ - `-i string` - string will be a default reply if user simply presses Enter (requires -e)
+ - `-n num` - read num characters, not the entire line
+ - `-p prompt` - display an input prompt
+ - `-r` - raw mode - do not interpret backslash as escape character
+ - `-s` - silent mode - do not echo characters to the display (confidential input)
+ - `-t seconds` - timeout; after this, read will return a non-zero exist status
+ - `-u fd` - use input from file descriptor fd, rather than stdin
+
+Example to read a "secret", with timeout even
+
+```
+
+    if read -t 10 -sp "Enter secret passhprase > " secret_pass; then
+        echo -e "\nSecret passphrase = '$secret_pass'"
+    else
+        echo -e "\nInput timed out" > &2
+        exit 1
+    fi
+
+```
+
+**IFS**
+
+The shell performs word splitting on the input given to `read`. This is configured by the shell variable IFS (Internal Field Separator). The default value contains a space, a tab, and a newline character.
+
+To separate fields from a file like `/etc/passwd`, IFS can be changed to a single `:`, then `read` can be used.
+
+```
+
+    read -p "Enter a username > " user_name
+
+    file_info="$(grep "^$user_name:" $FILE)"
+
+    if [ -n "$file_info" ]; then
+        IFS=":" read user pw uid gid name home shell <<< "$file_info"
+        echo $user ...
+    else
+        echo "No such user" >&2
+        exit 1
+    fi
+
+```
+
+The shell allows for one or more variable assignments right before a command. The environemnt will be temporary changed, but only for the execution of that command.
+
+The `<<<` indicates a **here string** - like a here document, but consisting of a single line. The string will be fed into standard input of the command. Why don't use the standard `echo string | read ...`? Because the shell handles pipelines by creating subshells; a subshell has its own copy of the environment, but can not alter the environemnt of the parent. The assignments to variables done by `read` will be lost when it finishes and the subshell terminates.
+
+**Validating input**
+
+Guarding against bad input is very important in scripts shared by multiple users, or even script that are only for us but that do dangerous operations.
+
+Example program
+
+```
+
+    #!/bin/bash
+
+    # read-validate: validate input
+
+    invalid_input () {
+        echo "Invalid input '$REPLY'" >&2
+        exit 1
+    }
+    read -p "Enter a single item > "
+
+    # input is empty (invalid)
+    [[ -z "$REPLY" ]] && invalid_input
+
+    # input is multiple items (invalid)
+    (( "$(echo "$REPLY" | wc -w)" > 1 )) && invalid_input
+
+    # is input a valid filename?
+    if [[ "$REPLY" =~ ^[-[:alnum:]\._]+$ ]]; then
+        echo "'$REPLY' is a valid filename."
+        if [[ -e "$REPLY" ]]; then
+            echo "And file '$REPLY' exists."
+        else
+            echo "However, file '$REPLY' does not exist."
+        fi
+
+        # is input a floating point number?
+        if [[ "$REPLY" =~ ^-?[[:digit:]]*\.[[:digit:]]+$ ]]; then
+            echo "'$REPLY' is a floating point number."
+        else
+            echo "'$REPLY' is not a floating point number."
+        fi
+
+        # is input an integer?
+        if [[ "$REPLY" =~ ^-?[[:digit:]]+$ ]]; then
+            echo "'$REPLY' is an integer."
+        else
+            echo "'$REPLY' is not an integer."
+        fi
+    else
+        echo "The string '$REPLY' is not a valid filename."
+    fi
+    
+```
+
+**Menus**
+
+A common type of interactivity is *menu-driven*. The user is presented a list of numbered choices and is asked to pick one. Presenting the menu can be a simple print, while validating the input can help in making sure the choice is valid.
+
+*Resources*
+
+ - [Bash Reference Manual - builtins](http://www.gnu.org/software/bash/manual/bashref.html#Bash-Builtins)
+
+
+
+
+
+
+
+
 
 
 
