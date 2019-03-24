@@ -2604,6 +2604,184 @@ A common type of interactivity is *menu-driven*. The user is presented a list of
 
  - [Bash Reference Manual - builtins](http://www.gnu.org/software/bash/manual/bashref.html#Bash-Builtins)
 
+### Flow Control: while / until
+
+**while loop**
+
+ - `count=1; while [[ "$count" -le 5 ]]; do echo "$count"; count=$((count+1)); done`
+
+Similar to if, while evaluates the exist status of a list of commands, and if the status is 0 (true), it executes the command between `do` and `done`. Keywords `continue` and `break` can be used to control program flow.
+
+An *endless loop* can be created using the `true` command as a test, and a `break` if a condition happens to end the endless loop.
+
+**until loop**
+
+ - `count=1; until [[ "$count" -gt 5 ]]; do echo "$count$; count=$((count+1)); done`
+
+The until loop is like the while loop, only that it executes the commands until the condition's exit status is 0. The decision between while and until is usually such that the test is easier to write.
+
+**Reading files with loops**
+
+while and until can process standard input. With redirection, they can be used to read files. The redirection operator is placed after the `done` statement. The `read` command will return an exit status different from 0 when there are no more lines to be read.
+
+```
+
+    while read distro version release; do
+        printf "Distro: %s\tVersion: %s\tReleased: %s\n" \
+            "$distro" "$version" "$release"
+    done < ../distros.txt
+
+```
+
+It is also possible to pipe standard input into a loop. Note that the pipe will execute the while in a subshell, so any variable created or assigned will be lost when the loop terminates
+
+ - `sort -k 1,1 distros.txt | while read distro version release; do echo "..."; done`
+
+*Resources*
+
+ - [Bash Guide for Beginners - tldp](http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_09_02.html)
+
+### Troubleshooting
+
+Common errors and tricks to track down porblems are good to know once scripts grow complicated.
+
+**Syntatic Errors**
+
+ - missing quotes 
+    - forgetting to put the end quotes on a string will make bash search for the first quotes, which may be farther down and so the string created may encompass keywords, commands etc
+    - best way to avoid this is using syntex highlighting in the editor (e.g.: for vim `:syntax on`)
+ - missing or unexpected tokens
+    - fogetting to complete a compound command (like if ... fi, or while ... do ... done)
+    - for example, forgetting the semi-colon after a `test / [ ]` command will make the shell add the following words as arguments to the test command, which will in turn make the then part of the if now part of the list of commands for if; so when `else` is seen, it is out of place
+ - unanticipated expansion
+    - if a script sometimes runs ok, but sometimes it doesn't, it may mean that an expansion is performed that is not as expected
+    - for example, expansion of an empty variable, which is used unquoted, will lead to an empty argument to the command or shell builtin, which is surely not what you want
+    - similar, expansion into multiword string can be same dangerous
+
+**Logical Errors**
+
+They do not prevent a script from running, but it will not produce the desired result, which is even worse. Some of the most common are
+
+ - incorrect conditional expressions
+ - "off by one" errors - loop conters
+ - unanticipated situations (like unanticipated input, errors)
+
+*Defensive programming* means validating assumptions
+
+ - `cd "$dir_name" && rm *` - do not remove files if the change directory fails
+    - still a problem: if `$dir_name` is empty or undefined, you will remove the files from the user's home directory
+    - `[[ -d "$dir_name" ]] && cd "$dir_name" && rm *`
+
+Even better, including code to warn about the error and terminat the program can be very useful
+
+```
+
+    if [[ ! -d "$dir_name" ]]; then
+        echo "no such dir '$dir_name'" >&2
+        exit 1
+    fi
+
+    if ! cd "$dir_name"; then
+        echo "cannot cd" >&2
+        exit 1
+    fi
+
+    if ! rm *; then
+        echo "file deletion failed" >&2
+        exit 1
+    fi
+
+```
+
+*Watching out for filenames* is important, since in Unix world, only two characters are not allowed in a file name: '/' and null character (a zero byte). A name could be "-rf ~", which would reck havo when expanded for a command like `rm *`. 
+
+The solution is to always precede wildcards with a path: 
+
+ - `rm ./*`
+
+Portable filenames (POSIX) include letters, numbers, underscore, hyphen, period. It also suggests not to start with a hyphen.
+
+*Verifying input* is a general programming rule. Best way is to make sure the input is from an allowed range.
+
+**Testing**
+
+In open-source world, the saying *release early, release often* is common. The earlier your program is exposed to usage and testing, the better; goal is to find problems early in the development cycle.
+
+For example, placing an `echo` before a command, you can see what it will look like.
+
+Useful testing requires good test cases (input data, operating conditions that reflect normal and edge/corner cases).
+
+**Debugging**
+
+If a problem is revealed, you need to see what the script is doing and why. A well-written script, written defensively and with feedback will help, but sometimes it is not enough.
+
+ - commenting out sections of the script can lead to discovering the problem area
+ - informative messages can be placed in the script for a sort of tracing
+    - `bash` provides a method of tracing by the `-x` option to the shebang or `set -x` in the script (`set +x` will turn it off)
+        - messages will be displayed with a leading `+` sign (the default value of PS4, which is the prompt for tracing)
+        - to include the line number also: `export PS4='$LINENO + '`
+ - extra messages to display the content of variables
+
+For really heavy-duty debugger, opensource projects like "Bash Debugger" exist.
+
+*Resources*
+
+ - [tldp gotchas](http://tldp.org/LDP/abs/html/gotchas.html)
+ - [bash pitfalls](http://mywiki.wooledge.org/BashPitfalls)
+ - [bash debugger](http://bashdb.sourceforge.net/)
+
+### Flow Control: branching with case
+
+Multiple-choice compound command is `case`
+
+```
+
+    case word in
+        [pattern [| pattern]...) commands;;]...
+    esac
+
+```
+
+The patterns used are like the ones for pathname expansion. They are terminated with a ")" character. Example of patterns
+
+ - `a)` - word "a"
+ - `[[:alpha:]])` - a single alphabetic character
+ - `???)` - three characters long
+ - `*.txt)` - word ending with ".txt"
+ - `*)` - any value of word; as last pattern, in will catch all that has not been dealt with
+
+Example
+
+```
+
+    read -p "enter word > "
+
+    case "$REPLY" in
+        [[:alpha:]])    echo "...." ;;
+        [ABC][0-9])     echo "...." ;; 
+        ???)            echo "...." ;;
+        *.txt)          echo "...." ;;
+        *)              echo "...." ;;
+    esac
+
+```
+
+Patterns can be combined
+
+ - `a|A)` - lower or uppercase "a"
+
+In bash prior to 4.0, case executed a single action and then the command terminated. Modern versions allow case to continue to the next test and see if it matches
+
+ - `;;&` - this will make case continue to the next test and check if the pattern for it matches
+
+*Resources*
+
+ - [Bash Reference Manual](http://tiswww.case.edu/php/chet/bash/bashref.html#SEC21)
+ - [tldp bash](http://tldp.org/LDP/abs/html/testbranch.html)
+
+
+
+
 
 
 
