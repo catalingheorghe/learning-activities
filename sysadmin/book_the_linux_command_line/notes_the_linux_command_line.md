@@ -2780,6 +2780,52 @@ In bash prior to 4.0, case executed a single action and then the command termina
  - [tldp bash](http://tldp.org/LDP/abs/html/testbranch.html)
 
 
+### Positional parameters
+
+The shell provides a set of variables ($0 - $9) that contain the words on the command line.
+
+ - `echo $0` - will always be non-empty, containing the pathname of the script executed
+ - more parameters can be accessed using parameter expanssion: `${10}, ${211} ..`
+
+The `$#` shell variable will give you the number of argumetns on the command line.
+ea688df5a74e1d73b105236a68f79968478845d7
+In order to access a great number of arguments, the shell provides a method to move all the parameters down by one (except for $0, which never changes).
+
+ - `count=1; while [[ $# -gt 0 ]]; do echo "Argument $count = $1"; count=$((count + 1)); shift; done`
+
+Note: `basename` command removes the leading portion of the path. With it, the script can be renamed easily and the script will adapt.
+
+Positional parameters can be used exactly the same with *shell functions*. The shell has a variable "$FUNCNAME" that contains the name of the current executing shell function. However, the variable "$0" will always contain the full pathname of the first name of the command line, not the name of the function.
+
+It might be useful to handle the complete list of positional parameters as a group, for example to create a wrapper around another program.
+
+ - `$*` - expands into the list of positional parameters, starting with 1. When in double quotes, it expands into a double quoted string with each parameter separated by the first character of the IFS
+ - `$@` - similar, but when in double quotes, it expands each positional parameter into a separate word as if it was surrounded by double quotes
+
+Example
+
+ - "word" "word with spaces"
+    - `$*`   - 4 args: word word with spaces
+    - `"$*"` - 1 arg : "word word with spaces"
+    - `$@`   - 4 args: word word with spaces
+    - `"$@"` - 2 args: "word" "word with spaces" -> this is the most common use-case
+
+*Resources*
+
+ - [Bash hackers wiki - poitional parameters](https://wiki.bash-hackers.org/scripting/posparams)
+ - [Bash reference manual - special parameters](http://www.gnu.org/software/bash/manual/bashref.html#Special-Parameters)
+ - [getopts](http://wiki.bash-hackers.org/howto/getopts_tutorial)
+ - bash man - SHELL BUILTIN COMMANDS
+
+
+
+
+
+
+
+
+
+
 
 
 
