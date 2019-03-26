@@ -2724,6 +2724,8 @@ If a problem is revealed, you need to see what the script is doing and why. A we
 
 For really heavy-duty debugger, opensource projects like "Bash Debugger" exist.
 
+*Note: design (and programming) is a funciton of time. Given little time, you design (code) something quick and dirty. Given abundent time, you design (code) something complicated.*
+
 *Resources*
 
  - [tldp gotchas](http://tldp.org/LDP/abs/html/gotchas.html)
@@ -2817,7 +2819,55 @@ Example
  - [getopts](http://wiki.bash-hackers.org/howto/getopts_tutorial)
  - bash man - SHELL BUILTIN COMMANDS
 
+### Flow Contorl - for
 
+**Traditional shell form**
+
+```
+
+    for variable [in words]; do
+        commands
+    done
+
+```
+
+ - `for i in A B C D; do echo $i; done`
+    - echo will be executed four times, one for each item in the list
+ - `for i in {A..D}; do echo $i; done`
+    - list created through *brace expansion*
+ - `for i in distros*.txt; do echo $i; done`
+    - or *pathname expansion*
+    - note that if the expansion does not match anything, `distro*.txt` will be the variable
+        - `if [[ -e "$i" ]]; then echo "$i"; fi`
+ - `for i in $(strings "$1"); do len="$(echo -n "$i" | wc -c)"; echo "$i $len"; done`
+    - go through the string literals in a file and print the len
+    - generate the for sequence using *command substitution*
+        - we do not surround the command substituion with double quotes, as usual, because we want word splitting to occur
+
+If the optional `in words` are omitted, for will process the positional parameters.
+
+Note: the usage of i, j, k comes from Fortran, where I, J, K, L, M variables, if used undeclared are considered integers. The rest are considered decimals.
+
+**C language form**
+
+Recent version of bash include a C-like form. It is useful when a numeric sequence is needed.
+
+```
+
+    for (( expression1; expression2; expression3 )); do
+        commands
+    done
+
+```
+
+The expressions are arithmetic expressions. The first one initializes conditions of the loop; the second determines when the loop ends; the third is carried one at the end of each iteration.
+
+ - `for (( i=0; i<5; i=i+1 )); do echo "$i"; done`
+
+*Resources*
+
+ - [advanced bash scripting guide](http://tldp.org/LDP/abs/html/loops1.html)
+ - [bash reference manual](https://www.gnu.org/software/bash/manual/bashref.html#Looping-Constructs)
 
 
 
