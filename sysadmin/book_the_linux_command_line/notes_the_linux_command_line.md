@@ -2787,10 +2787,10 @@ In bash prior to 4.0, case executed a single action and then the command termina
 The shell provides a set of variables ($0 - $9) that contain the words on the command line.
 
  - `echo $0` - will always be non-empty, containing the pathname of the script executed
- - more parameters can be accessed using parameter expanssion: `${10}, ${211} ..`
+ - more parameters can be accessed using parameter expansion: `${10}, ${211} ..`
 
-The `$#` shell variable will give you the number of argumetns on the command line.
-ea688df5a74e1d73b105236a68f79968478845d7
+The `$#` shell variable will give you the number of arguments on the command line.
+
 In order to access a great number of arguments, the shell provides a method to move all the parameters down by one (except for $0, which never changes).
 
  - `count=1; while [[ $# -gt 0 ]]; do echo "Argument $count = $1"; count=$((count + 1)); shift; done`
@@ -2814,7 +2814,7 @@ Example
 
 *Resources*
 
- - [Bash hackers wiki - poitional parameters](https://wiki.bash-hackers.org/scripting/posparams)
+ - [Bash hackers wiki - positional parameters](https://wiki.bash-hackers.org/scripting/posparams)
  - [Bash reference manual - special parameters](http://www.gnu.org/software/bash/manual/bashref.html#Special-Parameters)
  - [getopts](http://wiki.bash-hackers.org/howto/getopts_tutorial)
  - bash man - SHELL BUILTIN COMMANDS
@@ -2868,6 +2868,117 @@ The expressions are arithmetic expressions. The first one initializes conditions
 
  - [advanced bash scripting guide](http://tldp.org/LDP/abs/html/loops1.html)
  - [bash reference manual](https://www.gnu.org/software/bash/manual/bashref.html#Looping-Constructs)
+
+### Strings and Numbers
+
+**Parameter Expansion**
+
+Note: parameter expansion should always be enclosed in double quotes to prevent unwanted word splitting (unless, of course, it is actually desired).
+
+A form of parameter expansions was already encountered - shell variables.
+
+*Basic Parameters*
+
+ - `$a`, `${a}` - when epanded, it becomes whatever the variable a contains
+    - braces are required if the expansion is adjacent to other text
+    - also to access position parameters higher than 9: `${11}`
+
+*Expansions to manager empty variables*
+
+Several parameter expansions are intended to deal with empty and nonexistent variables. Usfeul for handling positional parameters and giving default values to parameters.
+
+ - `${parameter:-word}` - if parameter is unset or empty, the expansion results in word; if not empty, the value of parameter
+    - `echo ${foo:-"substitute if unset"}`
+ - `${parameter:=word}` - if parameter is unset or empty, the expansion results in word and it is assigned to parameter
+    - positional and other special parameters cannot be assigned this way
+ - `${parameter:?word}` - if parameter is unset or empty, the script will exit with an error, and the contents of word will be sent to standard error
+ - `${parameter:+word}` - if parameter is unset or empty, the expansion results in nothing; if not empty, word is substituted for parameter (the value of parameter is not changed)
+
+*Expansions that return variable names*
+
+The shell can return names of variables. This can be used in some exotic situations
+
+ - `${!prefix*}`
+ - `${!prefix@}`
+
+Both forms perform identically - return the names of existing variables with names beginning with *prefix*. E.g.: `echo ${!BASH*}`
+
+*String operations*
+
+ - `${#parameter}` - expands into the length of the string contained by parameter
+    - if parameter is `@` or `*`, then it returns the number of positional parameters
+ - `${parameter:offset} ${parameter:offset:length}` - extract a portion of the string contained by parameter, starting at offset
+    - if offset is negative, it starts from the end of the string (must be preceded by a space to not be confused with substitute if unset expansion
+    - if parameter is @, the result is length positional parameters starting at offset
+ - `${parameter#pattern} ${parameter##pattern}` - remove a leading portion of the string contained in parameter, defined by pattern (wildcard pattern, like in pathname expansion)
+    - the # removes the shortest match, while the ## removes the longest
+ - `${parameter%pattern} ${parameter%%pattern}` - same like the previous expansion, but remove text from the end
+ - `${parameter/pattern/string} ${parameter//pattern/string} ${parameter/#pattern/string} #{parameter/%pattern/string}`
+    - search and replace; first form, only the first occurrence, second all of them; the third required the match to occur at the beginning of the string, the last one, at the end
+    - if '/string' is omitted, pattern will just be deleted
+
+These kind of parameter expansions can replace some usage of commands like sed or cut, making script more efficient.
+
+*Case conversion*
+
+`bash` can do case conversion via four parameter expansions and two `declare` command options. *Normalizing* data to a standardized form (all upper or all lower) can be useful for storing it.
+
+`declare` command can be used to force a variable to always contain either upper or lower case, no matter what is assigned to it
+
+ - `declare -u upper`
+ - `declare -l lower`
+
+The following parameter expansions can perform case conversions, with some extra capabilities than declar
+
+ - `${parameter,,pattern}` - expand into all lowercase; pattern - optional shell pattern (e.g. [A-F]) that will limit which characters are converted (bash man for full set of patterns)
+ - `${parameter,pattern}` - only the first letter to lowercase
+ - `${parameter^^pattern}` - all uppercase
+ - `${parameter^pattern}` - expand but only change first char to uppercase
+
+**Arithmetic Evaluation and Expansion**
+
+Arithmetic expansion is used to perform operations on integers. Its basic form is `$((expression))`. This is related to the compound command `(( ))` used for arithmetic evaluation (truth tests).
+
+*Number bases*: the shell supports integer constants in any base. The notations are:
+
+ - `number` - decimal; `0number` - octal; `0xnumber` - hex; `base#number` - number in base
+
+*Unary operators* are `+` and `-`, to indicate whether a number is positive or negative.
+
+*Simple arithmetic* operators are `+ - * / ** %`. Shell arithmetics operates only on integers, so results of division will always be a whole number.
+
+*Assignment* is something that can also be done in an arithmetic expression
+
+ - `if (( foo = 5 )); then echo "true"; fi; echo $foo` - foo variable will be assigned 5 and the expression will evaluate to true, because foo is assigned a non-zero value
+
+Other useful assignment notations are: `+=, -=, /=, %=, ++, -- (both post and pre)`
+
+*Bit operators*: `~ << >> & | ^`
+
+ - `for (( i = 0; i < 8; i++ )); do echo $((1 << i)); done` - power of two - 8 bits
+
+*Logic*: the shell supports all the C like comparison operators, including logical. It also supports the ternary operator - only works with arithmetic expressions. Eg: `((a<1?++a:--a))` - a toggle of a between 1 and 0. To do assignments inside the expression, parentheses must be used.
+
+**bc - an arbitrary precision calculator language**
+
+Shell can handle integer arithmetic, but for floating point or higher math, an external program has to be used. Embedding Perl or AWK programs is on possible solution. Another one is to use a specialized calculator program; one that is found on many is `bc`.
+
+The `bc` program reads a file written in its own C-like language and executes it - can read from a file or from standard input. It support variables, loops, functions.
+
+ - `bc -q foo.bc` - where foo.bc is a text file containing the script (-q suppresses the copyright message)
+ - `bc -q` - interactive mode; line by line, until "quit" is given
+ - `bc < foo.bc` - scripts via standard input
+ - `bc <<< "2+2"` - here strings
+
+With bc you can for example create a monthly loan payment calculator, embedding the bc script in a here document. Note: the formula is explained [here](https://en.wikipedia.org/wiki/Amortization_calculator)
+
+*Resources*
+
+ - [bash hackers' wiki](https://wiki.bash-hackers.org/syntax/pe)
+ - [bash reference manual](https://www.gnu.org/software/bash/manual/bashref.html#Shell-Parameter-Expansion)
+
+
+
 
 
 
