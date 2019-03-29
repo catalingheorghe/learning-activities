@@ -1004,7 +1004,7 @@ Example: two identical drives attached to a computer, to copy all from one to an
 
 **`<cmd: genisoimage; wodim;>`**
 
-To make an ISO image on an existing CD-ROM, we can simpy use `dd` like in the above example (from CD-ROM device to local file). (for audio CDs, look at `cdrdao` command)
+To make an ISO image of an existing CD-ROM, we can simpy use `dd` like in the above example (from CD-ROM device to local file). (for audio CDs, look at `cdrdao` command)
 
 To create an ISO image with the contents of a directory
 
@@ -2976,6 +2976,89 @@ With bc you can for example create a monthly loan payment calculator, embedding 
 
  - [bash hackers' wiki](https://wiki.bash-hackers.org/syntax/pe)
  - [bash reference manual](https://www.gnu.org/software/bash/manual/bashref.html#Shell-Parameter-Expansion)
+
+### Arrays
+
+An array is a data structure which holds multiple values, as opposed to a scalar value. Arrays in bash are limited to a single dimension. Support was added in bash version 2. The original sh from Unix did not have it.
+
+Creating an array can be done by assigning a value to an element or by using the `declare` command
+
+ - `a[1]=foo; echo ${a[1]}`
+ - `declare -a a`
+
+Assigning values can be done individually or with multiple values
+
+ - `name[subscript]=value` - subscript is an integer, and can be an arithmetic expression greater, greater or equal than zero
+ - `name=(value1 value2 ...)` - assignment will start with element zero
+    - `days=(sun mon tue wed thu fri sat)`
+    - `days=([0]=sun [1]=mon [2]=tue [3]=wed [4]=thu [5]=fri [6]=sat)`
+
+An example of usage is storing data and indexing it by a criteria. For example, a script that examines the modification times of the files in a specified directory, per hour.
+
+*Array operations*
+
+The `*` and `@` can be used to access every element in an array. The same differences applies like for positional parameters, so the most useful form is usually `@`, quoted.
+
+ - `animals=("a dog" "a cat" "a fish")`
+ - `for i in "${animals[@]}"; do echo $i; done` - will give the exact word sequences, quoted like the original array data
+    - without quotes, both `*` and `@` give the same result - all words will be splitted (a, dog, a, cat ...)
+
+Determining the number of array elements can be done with parameter expansion, like finding the length of a string
+
+ - `a[100]=foo`
+ - ` echo ${#a[@]}` - number of array elements
+    - this will be 1, not 101!
+ - `echo ${#a[100]}` - length of element 100
+    - this will be 3, of course
+
+Note that in bash, array elements exist only if they have been assigned a value, no matter the value of the subscript.
+
+This means that an array can have "gaps" in the subscripts. The following parameter expanssions will give the list of subscripts. Same difference betwee `*` and `@` applies, so the quoted `@` form is most useful as it expands into separate words.
+
+ - `${!array[*]}`
+ - `${!array[@]}`
+
+To print out all values and all subscripts
+
+ - `foo=([2]=a [4]=b [6]=c)`
+ - `for in in "${foo[@]}"; do echo "$i"; done`
+ - `for in in "${!foo[@]}"; do echo "$i"; done`
+
+To append element at the end of an array the shell provides an easy solution: `+=` assignment operator
+
+ - `foo=(a b c)`
+ - `foo+=(d e f)`
+ - `echo ${foo[@]}` - a b c d e f
+
+Sorting an array can be done easily through a little coding - command subsititution plus a secondary array
+
+ - `a=(f e c d b a)`
+ - `a_sorter=($(for i in "${a[@]}"; do echo $i; done | sort))`
+
+To delete an array, the `unset` command must be used. It can also be used to detele single array elements.
+
+ - `unset 'foo[2]'` - must be quoted so that the shell does not perform expansion
+ - `unset foo`
+
+Note that assigning an empty value to an array variable will not empty its contents. It will only empty element zero.
+
+ - `foo=A` - any reference to an array variable without a subscript refers to element zero of the array
+
+*Associative arrays*
+
+Bash higher than 4.0 supports associative arrays - using strings instead of integers as array indexes.
+
+Associatives arrays must be created with `declare -A`; it is not enough to simply reference them.
+
+ - `declare -A colors`
+ - `colors["red"]="#ff0000"`
+ - `collors["green"]="#00ff00"
+ - `echo ${colors["blue"]}`
+
+### Exotica
+
+
+
 
 
 
