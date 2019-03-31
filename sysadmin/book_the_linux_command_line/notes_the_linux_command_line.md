@@ -263,7 +263,7 @@ Some other common "filter" commands are
     - `-v` - display lines that do not match
     - eg: `ls -l /bin /usr/bin | sort | uniq | grep zip`
  - `head / tail file...` - print first or last 10 lines
-    - `-n` - number of lines to print
+    - `-n` - number of lines to print (`- / +` can be used to exclude last / first lines)
     - `tail -f file` - watch the file in realtime
  - `tee` - read from stdin and copy to stdout and to files; like a T in plumbing, for replicating the input both down the pipe and to each file given as argument
     - eg: `ls -l /usr/bin | tee ls.txt | grep zip`
@@ -3052,37 +3052,114 @@ Associatives arrays must be created with `declare -A`; it is not enough to simpl
 
  - `declare -A colors`
  - `colors["red"]="#ff0000"`
- - `collors["green"]="#00ff00"
+ - `collors["green"]="#00ff00"`
  - `echo ${colors["blue"]}`
 
 ### Exotica
 
+**Group commands and subshells**
+
+`bash` allows grouping of commands together either via a group command or a subshell.
+
+ - `{ command1; command2; [command3; ...] }` - group command
+    - the spaces after and before the braces are important; last command must be followed by a semicolon or a newline
+ - `(command1; commnad2; [command3; ...])` - subshell
+
+Both are used to manage redirection, including usage of pipes
+
+ - `{ ls -l; echo "Listing of foo.txt"; cat foo.txt; } > output.txt` - redirect output of three commands to a file
+ - `(ls -l; echo "..."; cat foo.txt) > output.txt` - similar
+ - `{ ls -l; echo "Listing of foo.txt"; cat foo.txt; } | lpr` - the combined output is passed to another program
+
+*Process substitution*
+
+The difference between group commands `{ }` and subshell `( )` is that for the subshell the commands are executed in child copy of the current shell. The environment is copied but if any modifications are done to it, like variable assignment, it will not reflect in the parent shell. This means that if a subshell is not required, group commands will be faster and less expensive, memory-wise.
+
+The environment "problem" is similar to pipe-ing input into `read`. A pipe creates a subshell, so the read command will modify variables in its own environment only. The shell does provide a special form of expansion for this: process substitution.
+
+: - `<(list_of_commands)` - for processes that produce standard output
+ - `>(list_of_commands)` - for processes that intake standard input
+
+For the "read problem"
+
+ - `read < <(echo "foo"); echo "$REPLY"`
+    - the output of the echo shell is treated as an ordinary file for purposes of redirection
+    - `echo <(echo "foo")` - will give the file descriptor of that file
+
+Process substitution is often used with loops containing `read`.
+
+```
+
+    while read ... ; do
+        ...
+    done < <(list_of_commands)
+
+```
+
+Several substitutions can be used - basically, where a file can be put in a command, a process substitution can be placed instead
+
+ - `comm - 3 <(sort file1 | uniq) <(sort file2 | uniq)`
+    - lines unique to each of the two unsorted files
+
+**Traps**
+
+Scripts can respond to signals like any regular process. Large complicate scripts are more likely to be affected by the user logging of, or the system rebooting, or other interruptions. A signal handling routine can come in handy to exit in an orderly fashion (save state, delete temporary files etc).
+
+`bash` provides traps for this
+
+ - `trap argument signal [signal...]`
+    - argument is a string that will be treated as a command, triggered by the specified signal(s)
+ - `trap "echo 'I am ignoring you.'" SIGINT SIGTERM`
+
+It is common to specify a shell function as argument.
+
+Note that the signal handler output will be directed to stdout (a normal echo in a signal handler will print on stdout, if stdout not redirected to stdin).
+
+*Note - temporary files*: temporary files are usually created in the shared directory `/tmp`. To prevent *temp race attacks*, a non-predictable filename is required. One way is `tempfile=/tmp/$(basenme $0).$$.$RANDOM`. $RANDOM returns a value in 1 - 32767 only. A better way is to use `mktemp` program, which fills a pattern of X characters with random letters and numbers `tempfile=$(mktemp /tmp/foobar.$$.XXXXXXXXXXX`. For scripts executed by regular users, it may be wise to just avoid the `/tmp` directory and create a directory for temporary files in the user's home `[[ -d $HOME/tmp ]] || mkdir $HOME/tmp`.
+
+**Asynchronous execution**
+
+Scripts can be constructed so that multiple tasks are performed at the "same" time (multitasking).
+
+Usually this is done by launching one or more child scripts. However, it can be hard to keep the parent and children coordinated. `bash` has a builtin command to help manage asynchronous execution: `wait` - the parent script pauses until a specified process finishes.
+
+```
+
+    # parent
+    async-child &
+    pid = $!
+
+    sleep 2
+
+    # parent: pause to wait for child to finish
+    wait "$pid"
 
 
 
+    # child
+    sleep 5
+    
+```
 
+**Named pipes**
 
+A special type of file, named pipe, can be used to create a connection between two processes. They behave like FIFO buffers, as to the ordinary (unnamed) pipes
 
+ - `mkfifo named_pipe`
+    - create a named pipe - first letter in ls: p
+ - `process1 > named_pipe; process2 < named_pipe`
+    - it will behave like `process1 | process2`
+ 
+The advantage/difference from the regular pipe, is that the communication processes can be unrelated, for example from different terminal windows or login sessions. The first process, the one that sends output into the pipe, will block (*blocked pipe*) until there is somebody reading on the other side.
 
+*Resources*
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ - bash man page - "Compound Commands" section
+ - bash man page - EXPANSION (contains process substitution)
+ - [advanced bash scripting guide](http://tldp.org/LDP/abs/html/process-sub.html)
+ - [linux journal - process substitution](https://www.linuxjournal.com/content/shell-process-redirection)
+ - [linux journal - named pipes 1](https://www.linuxjournal.com/article/2156)
+ - [linux journal - named pipes 2](https://www.linuxjournal.com/content/using-named-pipes-fifos-bash)
 
 
 
