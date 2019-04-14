@@ -1,10 +1,16 @@
 # The Linux Command Line
 
+*Version: 19.01 - Fifth Internet Edition*
+
 William Shots
 
 ## Table of Contents
 
-0. About
+0. [About](#0-about)
+	- [Basic](#-basic)
+	- [Navigation and File System Tree Layout](#-navigation-and-file-system-tree-layout)
+	- [Manipulating Files and Directories](#-manipulating-files-and-directories)
+	- [Working with Commands](#-working-with-commands)
 1. Shell notes and Linux intro
 2. Configuration and the environment
 3. Common tasks and essential tools
@@ -12,9 +18,9 @@ William Shots
 
 ## 0. About
 
-Website [link](http://linuxcommand.org/tlcl.php) - Creative Commons license, free for download
+Website [link](http://linuxcommand.org/index.php) - Creative Commons license, free for download.
 
-*Version: 19.01 - Fifth Internet Edition*
+See also additional resources and "adventures.
 
 ## 1. Shell notes and Linux intro
 
@@ -22,9 +28,9 @@ Website [link](http://linuxcommand.org/tlcl.php) - Creative Commons license, fre
 
 Default shell offered by most Linux distributions: GNU Project called `bash` - Bourne Again SHell - `sh` was the original Unix shell written by Steve Bourne.
 
-A **terminal emulator** allows you to interact with the shell when using a GUI (ex: gnome-terminal, konsole).
+A *terminal emulator* allows you to interact with the shell when using a GUI (ex: gnome-terminal, konsole).
 
-Prompt usually contains *user@machinename cwd*. If the prompt has the last sign a `#`, the session has superuser priviledges.
+Prompt usually contains `user@machinename cwd`. If the prompt has the last sign a `#`, the session has superuser priviledges.
 
 Some simple commands
 
@@ -33,13 +39,13 @@ Some simple commands
  - `df`
  - `free`
 
-To **end a terminal session**: `exit`, or close the window or `Ctrl-d`.
+To *end a terminal session*: `exit`, or close the window or `Ctrl-d`.
 
 *Even if there are no terminal emulators running, there are 6 terminal sessions that are always running behind the GUI. They are called "virtual terminals" or "virtual consoles". To access them: `Alt-F1 - Alt-F6` with `Alt-F7` to return to graphical desktop.*
 
 ### Navigation and file system tree layout
 
-Hierarchical directory structure = file system tree for directories and files. *Root* directory is the first direcotry in the tree. Linux has a single tree for all devices; storage devices are mounted at various points in the tree.
+Hierarchical directory structure means a file system tree for directories and files. *Root* directory is the first directory in the tree. Linux has a single tree for all devices; storage devices are mounted at various points in the tree.
 
 **`<cmd: pwd; cd>`**
 
@@ -49,7 +55,7 @@ Hierarchical directory structure = file system tree for directories and files. *
     - `cd -` -> previous working directory
     - `cd ~user_name` -> user's home directory
 
-Filenames: "." as a first character denotes a hidden file or directory; avoid spaces; extensions doesn't count, but many applications programs use them.
+Filenames: "." as a first character denotes a hidden file or directory; avoid spaces; extensions don't count, but many application programs use them.
 
 **`<cmd: ls>`**
 
@@ -75,7 +81,7 @@ The date in the long format is the date and time of the file's last modification
     - h - help screen
     - q - exit less
 
-ASCII "As-Key" is one of the first and simplests represantation of data (mapping data to numbers; computers work with numbers). Text is a simple one to one mapping. 
+ASCII "As-Key" is one of the first and simplest represantation of data (mapping data to numbers; computers work with numbers). Text is a simple one to one mapping. 
 
 The *less* name comes from `less is more` - it is an improvement of an earlier Unix program called *more*. less falls into the class of *pagers*.
 
@@ -109,7 +115,7 @@ The design of the Unix file system tree layout is published in *Linus Filesystem
  - `/var` - place to store data that is likely to change (database files, user email, spool files etc)
  - `/var/log` - log files (ex: /var/log/messages or /var/log/syslog)
 
-Resources - file system layout
+*Resources - file system layout*
 
  - http://www.pathname.com/fhs/
  - https://wiki.debian.org/FilesystemHierarchyStandard
@@ -157,7 +163,7 @@ Note: Try to use `cp -i` as often as possible. Avoid accidentally replacing a fi
 
 Note: when using `rm` with wildcards, test if first with `ls`!
 
-*Hard links* are the original links of the Unix world. They represent an additional directory entry for a file. By default every file has a single hard link. A hard link can only reference a file in the same file system and it can not reference a directory. A hard link is exactly like the file its-self. When it is deleted, link is deleted, but the file contents remains until there are no more hard links. Hard links reference the same inode, the same data blocks from the disk. To display inode information use `ls -li`.
+*Hard links* are the original links of the Unix world. They represent an additional directory entry for a file. By default, every file has a single hard link. A hard link can only reference a file in the same file system and it can not reference a directory. A hard link is exactly like the file its-self. When it is deleted, link is deleted, but the file contents remains until there are no more hard links. Hard links reference the same inode, the same data blocks from the disk. To display inode information use `ls -li`.
 
 *Symbolic links* overcome both limitations of hard links. They create a special file type that contains a text pointer to the referenced file or directory. They are indistinguishable, but if the file is deleted the link remains, broken.
 
