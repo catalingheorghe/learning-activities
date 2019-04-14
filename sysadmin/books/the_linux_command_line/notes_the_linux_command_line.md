@@ -7,11 +7,16 @@ William Shots
 ## Table of Contents
 
 0. [About](#0-about)
+1. [Shell notes and Linux intro](#shell-notes-and-linux-intro)
 	- [Basic](#basic)
 	- [Navigation and File System Tree Layout](#navigation-and-file-system-tree-layout)
 	- [Manipulating Files and Directories](#manipulating-files-and-directories)
 	- [Working with Commands](#working-with-commands)
-1. Shell notes and Linux intro
+	- [Redirection](#redirection)
+	- [Expansion, Quoting](#expansion,-quoting)
+	- [Keyboard Tricks](#keyboard-tricks)
+	- [Permissions](#permissions)
+	- [Processes](#processes)
 2. Configuration and the environment
 3. Common tasks and essential tools
 4. Writing shell scripts
@@ -216,7 +221,7 @@ New commands can be created with `alias`. To check if the new command name that 
     - eg: `alias foo='cd /usr; ls; cd -'` ; `unalias foo`
  - `alias` - show all aliases configured in the environment
 
-Resources
+*Resources*
 
  - [bash reference manual](https://www.gnu.org/software/bash/manual/bashref.html)
  - [bash faq](http://mywiki.wooledge.org/BashFAQ)
@@ -224,7 +229,7 @@ Resources
 
 ### Redirection
 
-A Linux program gets its input for a file, *stdin*, sends the output data to a *stdout*, and the error message to *stderr*. All these can be redirected from the default keyboard and screen.
+A Linux program gets its input from a file, *stdin*, sends the output data to a *stdout*, and the error message to *stderr*. All these can be redirected from the default keyboard and screen.
 
  - `ls -l /usr/bin > ls-output.txt` - output redirection
  - `ls -l /usr/bin >> ls-output.txt` - output redirection, but appending, not truncating
@@ -249,12 +254,12 @@ The `cat` command can be used to join files together, con*cat*enate them. Any ty
 
 With no arguments, `cat` expects input from standard input. It copies the input line by line to stdout, until EOF is received (Ctrl-d from the keyboard).
 
-Note: GNU programs usually accepts multiple files as arguments; one of those arguments can be `-`, which signifies standard input.
+Note: GNU programs usually accept multiple files as arguments; one of those arguments can be `-`, which signifies standard input.
 
 **`<cmd: sort; uniq; wc; grep; tee>`**
 
 Standard input and standard output are put to good use by the shell **pipelines**, using the pipe operator (|). The stdout of one command is piped into the stdinput of another. More commands chained together that perform complex operations on data, are usually referred to as `filters`.
-`
+
  - `ls -l /usr/bin | less`
  - `ls -l /bin /usr/bin | sort | less`
 
@@ -329,7 +334,7 @@ The following examples do not produce the expected result.
 Quoting can selectively suppress expansion. It does this by using double quotes or single quotes.
 
  - double quotes - all special shell characters loose their meaning
-    - exceptions: `$, \, `` - this means that parameter expansion, arithmetic expansion, command substitution are still done
+    - exceptions: `$ \\ \`` - this means that parameter expansion, arithmetic expansion, command substitution are still done
     - `ls -l "bad filename.txt"`
  - single quotes - all expansions are suppressed
     - `echo '$USER command $(cmd) $((2+2))'` - will print exactly that
@@ -368,13 +373,13 @@ In Readline terminology, killing and yanking. Items that are cut, or killed, are
  - Ctrl-u - kill text from current location to beginning of line
  - Alt-d - kill text from current location to end of word
  - Alt-Backspace - kill text from current location to the beginning of word, or prev word if at the start of a word
- - Ctrl-y - yank text for kill-ring and insert it at the cursor location
+ - Ctrl-y - yank text from kill-ring and insert it at the cursor location
 
 Note: the META key mentioned in the READLINE documentation in the bash man page maps to Alt on modern computers. But in the age of terminals connected to mainframe computers, could be different. Linux still supports the META key by pressing and releasing ESC, it is the same like ALT pressed in the terminal.
 
 Completion
 
-Pressing TAB will tell the shell to complete the current word, it it has a unique match. Usually you use it in path completion, but it also works in variable names ($), user names (~) and hostnames (@) for host in `/etc/hosts`.
+Pressing TAB will tell the shell to complete the current word, if it has a unique match. Usually you use it in path completion, but it also works in variable names ($), user names (~) and hostnames (@) for host in `/etc/hosts`.
 
  - Alt-? or double Tab - list of possible completions
  - Alt-\* - insert all possible completions (does not work in terminal emulator)
@@ -383,7 +388,7 @@ Recent bash versions allows for programmable completion. For example: options fo
 
 **History**
 
-Bash keeps the command history in the file `.bash_history` in your home directory. It can be viewed using `history | less`. An *history expansion* can be used.
+Bash keeps the command history in the file `.bash_history` in your home directory. It can be viewed using `history | less`. And *history expansion* can be used.
 
 **`<cmd: history;>`**
 
@@ -478,7 +483,7 @@ There are several ways to **change identities**, aka assume other users' identit
 
 **`<cmd: su; sudo;>`**
 
-The `su` command start a shell as another user. With `-l`, a *login shell* is started, which loads the user's environment and changes to his home directory - this is usually what we want. If no username is specified, superuser is assumed.
+The `su` command starts a shell as another user. With `-l`, a *login shell* is started, which loads the user's environment and changes to his home directory - this is usually what we want. If no username is specified, superuser is assumed.
 
  - `su -l username` - start a login shell as user usernam
  - `su -` - start a login shell as root (-l can be shortened to -)
@@ -537,11 +542,11 @@ To **maintain users and groups** the commands to look into are: `adduser`, `user
 
 ### Processes
 
-At system startup the kernel initiates a few of its own activities as processes and start *init*, PID 1, that reads *init script* from /etc and initializes various services as *daemon programs*. The kernel keeps tracks of the processes - PIDs, user id, memory, state etc.
+At system startup the kernel initiates a few of its own activities as processes and starts *init*, PID 1, that reads *init scripts* from /etc and initializes various services as *daemon programs*. The kernel keeps tracks of the processes - PIDs, user id, memory, state etc.
 
 The most common way to **view processes** is using the `ps` command. By default it only shows the processes associated with the current terminal session. "TTY" is short for *teletype* and shows the *controlling terminal* of the process. "Time" shows the CPU time used by the process.
 
-To see all the processes that we own, no matter the controlling terminal, add "x" as an option to ps. A "?" for TTY means that the process has no controlling terminal. The column STAT shown the state of the process.
+To see all the processes that we own, no matter the controlling terminal, add "x" as an option to ps. A "?" for TTY means that the process has no controlling terminal. The column STAT shows the state of the process.
 
 STAT column
 
