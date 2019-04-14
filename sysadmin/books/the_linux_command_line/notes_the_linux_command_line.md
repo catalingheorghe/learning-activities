@@ -21,7 +21,15 @@ William Shots
 	- [Environment](#environment)
 	- [Vi intro](#vi-intro)
 	- [Customizing the Prompt](#customizing-the-prompt)
-3. Common tasks and essential tools
+3. [Common Tasks and Essential Tools](#3-common-tasks-and-essential-tools)
+	- [Package Management](#package-management)
+	- [Storage Media](#storage-media)
+	- [Networking](#networking)
+	- [Searching for Files](#searching-for-files)
+	- [Archiving and Backup](#archiving-and-backup)
+	- [Regular Expressions](#regular-expressions)
+	- [Text Processing](#text-processing)
+	- TODO
 4. Writing shell scripts
 
 ## 0. About
@@ -918,8 +926,8 @@ There are usually two types of tools
     - `rpm -qa`
  - determine whether a package is installed
     - `dpkg -s package_name`
-    - `rmp -q package_name`
- - display info about an install packages
+    - `rpm -q package_name`
+ - display info about an installed package
     - `apt-cache show package_name`
     - `yum info package_name`
  - find which package installed a file
@@ -941,7 +949,7 @@ File `/etc/fstab` lists the devices that will be mounted at boot time. Fields:
  - 3 - file system type - native Linux usually Fourth Extended File System (ext4)
  - 4 - mount options - ex: read-only, or non-executable
  - 5 - frequency - if and when a file system is to be backed up with the `dump` command
- - 6 - order - what order file systems should be checks with the `fsck` command
+ - 6 - order - what order file systems should be checked with the `fsck` command
 
 **`<cmd: mount; umount;>`**
 
@@ -1063,7 +1071,7 @@ This can also be used to verify if we have written an image correctly on the med
 **`<cmd: ping; traceroute; ip; netstat;>`**
 
  - `ping linuxcommand.org` - test network connection
- - `traceroute shashdor.org` - see routers along the way to a host
+ - `traceroute shashdot.org` - see routers along the way to a host
     - `*` in the output means that the hop does not provide identifying information, due to router configuration, network congestion, firewall etc; may be overcome by using `-T / -I` as parameter (tcp syn / icmp echo)
  - `ip` - multi-purpose network config tool (replaces the deprecated `ifconfig`)
     - `ip a` - show network interfaces, their state and configuration
@@ -1219,13 +1227,13 @@ To execute an action interactively, `-ok` action should be used.
 
  - `find ~ -type f -name 'foo*' -ok ls -l '{}' ';'`
 
-To not call a new instance of the command each time a match is found, we can combine all the search results and launch a single command with them as arguments. This can be done the tradition way, using the external command `xargs`, or using a new feature in `find` itself. The latter is achieved by simply the semicolong character to a plus sign.
+To not call a new instance of the command each time a match is found, we can combine all the search results and launch a single command with them as arguments. This can be done the tradition way, using the external command `xargs`, or using a new feature in `find` itself. The latter is achieved by simply changing the semicolon character to a plus sign.
 
  - `find ~ -type f -name 'foo*' -ok ls -l '{}' +` - ls command is executed on an argument list comprised of the search results
 
 **`<cmd: xargs;>`**
 
-The xargs commands accepts input for standard input and converts it into an argument list for a specified command.
+The xargs commands accepts input from standard input and converts it into an argument list for a specified command.
 
  - `find ~ -type f -name 'foo*' -print | xargs ls -l`
 
@@ -1246,14 +1254,14 @@ Usually used to set or update the access, change and modify times of files, it i
 
 The above creates 100 subdirectories with 26 empty files each.
 
- - `touch p/timestamp` - creates and empy file and sets its modification time to current time
- - `stat p/timestamp - reveals all that the system understands about a file and its attributes
+ - `touch p/timestamp` - creates an empty file and sets its modification time to current time
+ - `stat p/timestamp` - reveals all that the system understands about a file and its attributes
 
 Example
 
  - `touch p/timestamp`
  - `find p -type f -name 'file-B' -exec touch '{}' ';'` - update file-B files
- - `find p -type f -newer p/timestamp' - find files newer than a file
+ - `find p -type f -newer p/timestamp` - find files newer than a file
 
 To find the files and directories with not ok permission, and then to change these permissions
 
@@ -1266,10 +1274,10 @@ Options
 The options are used to control the scope of a *find* search. They may be included with other tests and actions when constructing expressions.
 
  - `-depth` - process a directory's files before the directory itself
- - `-maxdepth levels` - how much find will descen
+ - `-maxdepth levels` - how much find will descend
  - `-mindepth levels` - minimum number of level *find* will descend before applying tests and actions
  - `-mount` - not to traverse directories that are mounted on other file systems
- - `-noleaf` - not optimze search based on the assumption that it is searching a Unix-like filesystem (for dos/windows, cd-rom filesystems)
+ - `-noleaf` - not optimize search based on the assumption that it is searching a Unix-like filesystem (for dos/windows, cd-rom filesystems)
 
 *Resources*
 
@@ -1301,13 +1309,13 @@ Compression algorithms can be *lossless* (preserves all data, a restored version
 
 **`<cmd: bzip2; bunzip2; bzcat; bzip2recover;>`**
 
-The `bzip2`program is similar but achieves hight compression and the cost of speed. The usual extension is `.bz2`. The program can be used in the same way as gzip. Note that the *-number* option has a different meaning and it does not support *-r*. It also comes with a `bzcat` program, as well as a program that will try to recover damaged bz2 files, `bzip2recover`.
+The `bzip2`program is similar but achieves higher compression at the cost of speed. The usual extension is `.bz2`. The program can be used in the same way as gzip. Note that the *-number* option has a different meaning and it does not support *-r*. It also comes with a `bzcat` program, as well as a program that will try to recover damaged bz2 files, `bzip2recover`.
 
 *Note*: compressing an already compressed file, like a jpg, will most likely give you a large size. There is no redundant data left that could be saved so that it outweighs the overhead added by the compression scheme.
 
 *Archiving files*
 
-Archiving means gathering up many files and budling them together into a single large file. It is usually done in backup, when moving data from one system to another.
+Archiving means gathering up many files and bundling them together into a single large file. It is usually done in backup, when moving data from one system to another.
 
 **`<cmd: tar;>`**
 
@@ -1373,7 +1381,7 @@ zip can also write its output to stdout but few programs can make use of the out
 
 **`<cmd: rsync;>`**
 
-A common backup strategy is to keep on or more directories synchronized with another directory or directories located on either the local system (usually a removable storage device of some kind) or a remote system. In the Unix world, the preferred tool for this is `rsync` that uses the *rsync remote-update protocol*, which allows rsync to quickly detect differences between two directories and perform the minimum copying required.
+A common backup strategy is to keep one or more directories synchronized with another directory or directories located on either the local system (usually a removable storage device of some kind) or a remote system. In the Unix world, the preferred tool for this is `rsync` that uses the *rsync remote-update protocol*, which allows rsync to quickly detect differences between two directories and perform the minimum copying required.
 
  - `rsync options source destination` - source and destination can be
 	- local file or directory
@@ -1415,7 +1423,7 @@ The second way to do this is by using a *rsync server*. rsync can be configured 
 
 Text manipulation play a big role in Unix-like systems, and regular expressions are a very powerful tool for this.
 
-Regular expressions are symbolic notations used to identify patterns in text. In a way similar to shell wildcard, but much more capable. Note that there are different versions of regular expressions, they vary from tool to tool and programmin language to language. This will present regular expressions as in the **POSIX variant** (which covers most of the command line tools). Most programming languages (most notably Perl) uses a slightly larger and richer set of nations.
+Regular expressions are symbolic notations used to identify patterns in text. In a way similar to shell wildcards, but much more capable. Note that there are different versions of regular expressions, they vary from tool to tool and programming language to language. This will present regular expressions as in the **POSIX variant** (which covers most of the command line tools). Most programming languages (most notably Perl) uses a slightly larger and richer set of notations.
 
 **`<cmd: grep;>`**
 
@@ -1532,7 +1540,7 @@ Validate a phone list with grep: we have a text file with phone numbers one per 
 
  - `grep -Ev '^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$' phonelist.txt`
 
-Find ungly filenames with find: find has a test that can uses regular expressions; unlike grep, which will print a line that contains a match, for find, the pathname must match exactly. We can use this to find files that have in their pathname characters outside `[-_./0-9a-z-A-Z]`
+Find ugly filenames with find: find has a test that can use regular expressions; unlike grep, which will print a line that contains a match, for find, the pathname must match exactly. We can use this to find files that have in their pathname characters outside `[-_./0-9a-z-A-Z]`
 
  - `find . -regex '.*[^-_./0-9a-zA-Z].*'` - we used zero or more instances of any characters at both ends, for a full match, and a negated bracket expression for the unacceptable characters
 
@@ -1558,7 +1566,7 @@ Applications of text are vast:
  - configuration files
  - documents - large documents in text format and then embed markup language to describe the formatting
 	- web pages - text documents either use *Hypertext Markup Language* or *Extensible Markup Language* for the visual format
-	- email - even non-text attachments are converted into text representation for transmission; a mail message seen with less with show a header with metadata and then the body with content
+	- email - even non-text attachments are converted into text representation for transmission; a mail message seen with less will show a header with metadata and then the body with content
 	- printer output - output destined for a printer is sent as plain text, or if the page contains graphics, converted into a text format *page description language* known as PostScript, which is then set to a program that generates the graphic dots to be printed
 	- program source code
 
@@ -1569,8 +1577,8 @@ Applications of text are vast:
 *cat*
 
  - `-A` - display control characters; eg: MS-DOS line endings or lines of text with trailing spaces
- - `cat > foo.txt` - primitive word processor to create and edit a file; Ctlr-d indicates end of file
- - `-n` - disaply also line numbers
+ - `cat > foo.txt` - primitive word processor to create and edit a file; Ctrl-d indicates end of file
+ - `-n` - display also line numbers
  - `-s` - supress the output of multiple blank lines (show only one)
 
 Note about MS-DOS text vs Unix text: Unix and DOS define line endings differently. Unix ends a line with linefeed character (ASCII 10), while MS-DOS uses the sequence carriage return (ASCII 13) and linefeed. `dos2unix` and `unix2dos` are programs that convert lineendings, but this can be done with "basic" programs as well.
@@ -1585,7 +1593,7 @@ Sort the contents of standard input or one or more specified files and sends the
  - `-n / --numeric-sort`
 	- see also `-g` which is general numeric value, not string numerical value
  - `-r / --reverse`
- - `-k / --key=field1[,field2]` - sort basedon a key field rather than the entire line
+ - `-k / --key=field1[,field2]` - sort based on a key field rather than the entire line
  - `-m / --merge` - treat arguments as pre-sorted and only merge them
  - `-o / --output=file`
  - `-t / --field-separator=char` - define field separator character; by default, spaces or tabs
@@ -1714,7 +1722,7 @@ Patch has a large number of options and there are additional utility programs th
 
 *tr*
 
-The tr program *tranliterates* characters - changes them from one alphabet to another. Operates on stdin and outputs to stdout. 
+The tr program *transliterates* characters - changes them from one alphabet to another. Operates on stdin and outputs to stdout. 
 
  - `echo "lowercase text" | tr a-z A-Z`
 	- the character sets arguments can be
