@@ -7,10 +7,10 @@ William Shots
 ## Table of Contents
 
 0. [About](#0-about)
-	- [Basic](#-basic)
-	- [Navigation and File System Tree Layout](#-navigation-and-file-system-tree-layout)
-	- [Manipulating Files and Directories](#-manipulating-files-and-directories)
-	- [Working with Commands](#-working-with-commands)
+	- [Basic](#basic)
+	- [Navigation and File System Tree Layout](#navigation-and-file-system-tree-layout)
+	- [Manipulating Files and Directories](#manipulating-files-and-directories)
+	- [Working with Commands](#working-with-commands)
 1. Shell notes and Linux intro
 2. Configuration and the environment
 3. Common tasks and essential tools
