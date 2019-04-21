@@ -29,8 +29,10 @@ William Shots
 	- [Archiving and Backup](#archiving-and-backup)
 	- [Regular Expressions](#regular-expressions)
 	- [Text Processing](#text-processing)
-	- TODO
-4. Writing shell scripts
+	- [Formatting Output](#formatting-output)
+	- [Printing](#printing)
+	- [Compiling Programs](#compiling-programs)
+4. [Writing Shell Scripts](#4-writing-shell-scripts)
 
 ## 0. About
 
@@ -1727,10 +1729,10 @@ The tr program *transliterates* characters - changes them from one alphabet to a
  - `echo "lowercase text" | tr a-z A-Z`
 	- the character sets arguments can be
 		- enumerated list `ABCDEFGHIJ`
-		- character range (subjec to same possible issues with ordering depending on locale)
-		- POSIX character classes like
+		- character range (subject to same possible issues with ordering depending on locale)
+		- POSIX character classes
 	- the sets can have unequal lenghts
-		- `echo "lowercase" | tr [:lower:] A` - will transform all chars in A's
+		- `echo "lowercase" | tr [:lower:] A` - will transform all lowercase chars in A's
 		- `echo "hello" | tr [a-e] [A-E]` - will yield "hEllo"
 
 It also has an option to delete characters from the input.
@@ -1780,7 +1782,7 @@ Basic editing commands supported by sed (not only `s` and `p`)
  - `p` - print current line (by default sed prints every line and only edits matching ones)
  - `q` - exit sed without processing more lines; without -n, outputs the current line
  - `Q` - exit sed
- - `s/regexp/replacemen/` - replacement may include `&`, which is the text matched by regexp. Also it can include \1 to \9, subexpression in regexp. A further flag may be specified at the end to modify the command's behavior (most common, `g` to perform the substituion globally to a line, not only to the first match)
+ - `s/regexp/replacement/` - replacement may include `&`, which is the text matched by regexp. Also it can include \1 to \9, subexpression in regexp. A further flag may be specified at the end to modify the command's behavior (most common, `g` to perform the substituion globally to a line, not only to the first match)
  - `y/set1/set2` - preform transliteration of characters - sets must have same length (character ranges or classes are not supported)
 
 The `s` substitute command is the most used. For example, we can transform dates in format MM/DD/YYYY to YYYY-MM-DD
@@ -1812,7 +1814,7 @@ To do more complex transformations with sed, a script can be used. For example, 
 
  - `sed -f distros.sed distros.txt`
 
-Comments and blank lines are for readability and maintainability. Line-continuation characters ('\' + newline) can be used to embed multiple lines.
+Comments and blank lines are for readability and maintainability. Line-continuation characters ('\\' + newline) can be used to embed multiple lines.
 
 Note: `sed` is usually used for simple one-line tasks. For larger tasks, the most popular tools are `awk` and `perl`.
 
@@ -1843,7 +1845,7 @@ For other filter modes and options, see the documentation.
 
 ### Formatting output
 
-*Simple formatting tools* mostly one single job and are usually used in pipeline or scripts: nl, fold, fmt, pr, printf.
+*Simple formatting tools* mostly do one single job and are usually used in pipeline or scripts: nl, fold, fmt, pr, printf.
 
 **`<cmd: nl; fold; fmt; pr; printf;>`**
 
@@ -1949,7 +1951,7 @@ A complete converstion specifier has the form
 		- ` ` - add a leading space for positive numbers
 		- `+` - sign positive numbers
 	- width - number specifying the minimum field width
-	- .precision - for floating-point numbers, the number for decimal; for sting, the number of characters of output
+	- .precision - for floating-point numbers, the number for decimal; for string, the number of characters of output
 
 *Document formatting systems*
 
@@ -2021,7 +2023,7 @@ We will look at command line tools to print files and control printer operation.
 
 As mainframe computers where shared, users connecting to them via terminals, so where printers, which were attached to those large computers. To identify print jobs from a particular user, a *banner* page was oftern printed at the beginning of each print job. Then the computer support staff would deliver the prints to the people.
 
-First printes where *impact printers*, mechanically forming impressions on the paper. Most common types where *daisy-wheel* and *dot-matrix*. The font was monospace; printing was done at fixed positions on the page and the printable area was fixed. Most printers did 10 CPI, charactes per inch, and 6 LPI (lines per inch). That means that the US-letter sheet of paper (format popular in US, a bit different than A4) is 85 characters by 66 lines. Taking into account a small margin on each syde, you get 80 characters. So using a terminal with 80 chars width you get a WYSIWYG editor.
+First printers where *impact printers*, mechanically forming impressions on the paper. Most common types where *daisy-wheel* and *dot-matrix*. The font was monospace; printing was done at fixed positions on the page and the printable area was fixed. Most printers did 10 CPI, charactes per inch, and 6 LPI (lines per inch). That means that the US-letter sheet of paper (format popular in US, a bit different than A4) is 85 characters by 66 lines. Taking into account a small margin on each syde, you get 80 characters. So using a terminal with 80 chars width you get a WYSIWYG editor.
 
 Data is sent to a typewriter-like printer in a stream of bytes - ASCII codes for characters and for control characters. Some limited effects can be achieved: like using backspace (Ctrl-h, ^H) to go back, print the char again, for a more bolded impression.
 
@@ -2098,7 +2100,7 @@ There is another similar program *enscript* that converts text to PostScript, bu
 
 *Monitoring and Controlling Print Jobs*
 
-CUPS is designe to handle multiple print jobs from multiple users. Each printer is given a *print queue* where jobs are waiting to be *spooled* to the printer.
+CUPS is designed to handle multiple print jobs from multiple users. Each printer is given a *print queue* where jobs are waiting to be *spooled* to the printer.
 
 *lpstat - display print system status*
 
@@ -2127,7 +2129,7 @@ The lpq program shows the status and contents of the printer queues (print jobs)
 
 ### Compiling programs
 
-Compiling programs from source is a big part of Unix and Linux way of thinking. However, now distribution maintainers keep huge repositories of precompiler binaries. Nevertheless, compiling from source still has reasons: availability (not all distributions package all programs) and timeliness (most distributions do not compile the laster version).
+Compiling programs from source is a big part of Unix and Linux way of thinking. However, now distribution maintainers keep huge repositories of precompiler binaries. Nevertheless, compiling from source still has reasons: availability (not all distributions package all programs) and timeliness (most distributions do not compile the latest version).
 
 Compiling means translating *source code* into *machine language* (numeric code - instructions expressed in binary). The next level over machine code is assembly language - character mnemonics for the CPU instructions. The assembler transforms assembly language into machine language. Above this come the *high-level programming languages* - hide the details of what the process is doing: FORTRAN, COBOL, C, C++ etc. The *compiler* turns this higher level source code into machine code. Some compilers translate into assembly language and then use an assembler.
 
@@ -2150,16 +2152,16 @@ Download souce code archive for `diction` program - a spell and style checker.
 
 GNU Project programs contain files like README, INSTALL, NEWS, COPYING. Before building, README and INSTALL should be read.
 
-Header files installed with the compiler are usually put in `/usr/include/` (stdion.h, unistd.h, stdlib.h etc).
+Header files installed with the compiler are usually put in `/usr/include/` (stdin.h, unistd.h, stdlib.h etc).
 
 Building the program is usually a simple two step process
 
  - `./configure` - shell script that analyzes the build environment (adjustments to source code for different Unix types; check for external tools and components)
- - `make` - the make program run according to the Makefile created previously by the configure script; formed of targets and their dependencies, and instructions how to build the targets. It keeps the targets up-to-date on every run, but only the ones that are required, that have a changed dependency
+ - `make` - the make program runs according to the Makefile created previously by the configure script; formed of targets and their dependencies, and instructions how to build the targets. It keeps the targets up-to-date on every run, but only the ones that are required, that have a changed dependency
 
 Installing the program is equally simple, for packages that provide the de-facto make special target
 
- - `sudo make install` - the system directory for installation is usually `/usr/local/bin` (not writable but regular users)
+ - `sudo make install` - the system directory for installation is usually `/usr/local/bin` (not writable for regular users)
 
 *Resources*
 
