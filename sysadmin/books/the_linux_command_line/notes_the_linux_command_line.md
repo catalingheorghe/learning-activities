@@ -33,6 +33,19 @@ William Shots
 	- [Printing](#printing)
 	- [Compiling Programs](#compiling-programs)
 4. [Writing Shell Scripts](#4-writing-shell-scripts)
+	- [First Script (Basics)](#first-script-(basics))
+	- [Starting a Project](#starting-a-project)
+	- [Top-Down Design](#top-down-design)
+	- [Flow Control: Branching with if](#flow-control:-branching-with-if)
+	- [Reading Keyboard Input](#reading-keyboard-input)
+	- [Flow Control: while, until](#flow-control:-while,-until)
+	- [Troubleshooting](#troubleshooting)
+	- [Flow Control: Branching with Case](#flow-control-branching-with-case)
+	- [Positional Parameters](#positional-parameters)
+	- [Flow Control: for](#flow-control-for)
+	- [Strings and Numbers](#strings-and-numbers)
+	- [Arrays](#arrays)
+	- [Exotica](#exotica)
 
 ## 0. About
 
@@ -2169,7 +2182,7 @@ Installing the program is equally simple, for packages that provide the de-facto
 
 ## 4. Writing Shell Scripts
 
-### First script - basics
+### First script (basics)
 
 At its simplest, a shell script is a file consisting of a series of commands. The shell is both an interface to the system and a scripting language interpreter.
 
@@ -2183,9 +2196,9 @@ Basics (formatting, executable permissions, location)
  - the location of the script must be in PATH to execute it without giving the path to it; note that `~/bin`, if existing, is part of the PATH (it is added at login, or in a login shell `su - $username`)
 	- `~/bin` - good location for personal use scripts
 	- `/usr/local/bin` - a script that everyone on the system is allowed to use
-	- `/usr/local/sbin` - script intended for use by the system administrator (locally supplied software, scripts or compile program should go under `/usr/local`, not `/bin` or `/usr/bin` - these are specifed by the Linux Filesystem Hierarchy Standard to contain files supplied and maintained by the Linux distributor)
+	- `/usr/local/sbin` - script intended for use by the system administrator (locally supplied software, scripts or compiled programs should go under `/usr/local`, not `/bin` or `/usr/bin` - these are specifed by the Linux Filesystem Hierarchy Standard to contain files supplied and maintained by the Linux distributor)
 
-Note: to make the shell read a file and execute the commands in it, like they were given from the keyboad: `source` or `.` (shell builtin). One example would be modified `.bashrc` or similar and wanting the modifications in the current session, you can just source it.
+Note: to make the shell read a file and execute the commands in it, like they were given from the keyboad: `source` or `.` (shell builtin). One example would be modifying `.bashrc` or similar and wanting the modifications in the current session, you can just source it.
 
 Making a script easy to read and modify is very important for making it useful (maintainability)
 
@@ -2216,7 +2229,7 @@ Vim for writing scripts
 
  - `:syntax on` (full version of vim and a shebang in the script; with no shebang: `set syntax=sh`)
  - `:set hlsearch`
- - `:set tabstop` - number of characters occupied by a tab character; default is 8; this allows longer lines to fit easier on the screen and is a common practice
+ - `:set tabstop 4` - number of characters occupied by a tab character; default is 8; this allows longer lines to fit easier on the screen and is a common practice
  - `:set autoindent` (to stop indentation press `Ctrl-d`)
 
 Note: these changes can be made permanent by adding them to your `~/.vimrc` file
@@ -2262,11 +2275,11 @@ All values assigned to variables are treated as strings (`declare -i` can restri
 
  - `a=z`
  - `b="a string"    # Quotes required for the space`
- - `c= a and $b"    # Can contain other expansions`
+ - `c="a and $b"    # Can contain other expansions`
  - `d=$(ls -l foo.txt)    # Output of a command`
- - `e=$((5 * 7))    # Arithmetic expansion
- - `f="\t\a string\n"     # Escape sequences
- - `a=3 b="a string"`     $ Multiple assignment on same line
+ - `e=$((5 * 7))    # Arithmetic expansion`
+ - `f="\t\a string\n"     # Escape sequences`
+ - `a=3 b="a string"     # Multiple assignment on same line`
 
 During expansion, variable name may be surrounded by curly braces: `mv "$filename" "${filename}1"`.
 
@@ -2331,7 +2344,7 @@ Local variables are only accesible within the shell function. Names can already 
 
 Note that shell functions make great replacements for aliases. A shell function can go in `.bashrc` and then it can executed easily from the CLI.
 
-### Flow Control - Branching with if
+### Flow Control: Branching with if
 
 Some scripts should behave differently, for example in order to adapt to the privileges of the user running the script. We need the proram to *branch*.
 
@@ -2408,7 +2421,7 @@ Supported expressions and tests:
     - `-w file` - writable for effective user
     - `-x file` - executable for effective user
 
-The proper/safe way to specify a file path is by quoting it: `if [ -f "FILE" ]; then echo "it is a file"; fi`
+The proper/safe way to specify a file path is by quoting it: `if [ -f "$FILE" ]; then echo "it is a file"; fi`
 
  - string expressions
     - `string` - string is not null
@@ -2493,7 +2506,7 @@ For example, to exit a script (or a shell session) if a dir does not exist
 
 **read - read values from stdin**
 
-The `read` command is a shell builtin that read a single line of standard input. It can read data from standard input, or if redirected, from a file.
+The `read` command is a shell builtin that reads a single line of standard input. It can read data from standard input, or if redirected, from a file.
 
  - `read [-options] [variable...]`
     - it can handle one or more variables to hold the input value (it assigns fields from stdin to the specified variables)
@@ -2628,7 +2641,7 @@ A common type of interactivity is *menu-driven*. The user is presented a list of
 
  - [Bash Reference Manual - builtins](http://www.gnu.org/software/bash/manual/bashref.html#Bash-Builtins)
 
-### Flow Control: while / until
+### Flow Control: while, until
 
 **while loop**
 
@@ -2667,7 +2680,7 @@ It is also possible to pipe standard input into a loop. Note that the pipe will 
 
 ### Troubleshooting
 
-Common errors and tricks to track down porblems are good to know once scripts grow complicated.
+Common errors and tricks to track down problems are good to know once scripts grow complicated.
 
 **Syntatic Errors**
 
@@ -2746,9 +2759,9 @@ If a problem is revealed, you need to see what the script is doing and why. A we
         - to include the line number also: `export PS4='$LINENO + '`
  - extra messages to display the content of variables
 
-For really heavy-duty debugger, opensource projects like "Bash Debugger" exist.
+For really heavy-duty debugging, opensource projects like "Bash Debugger" exist.
 
-*Note: design (and programming) is a funciton of time. Given little time, you design (code) something quick and dirty. Given abundent time, you design (code) something complicated.*
+*Note: design (and programming) is a function of time. Given little time, you design (code) something quick and dirty. Given abundent time, you design (code) something complicated.*
 
 *Resources*
 
@@ -2843,7 +2856,7 @@ Example
  - [getopts](http://wiki.bash-hackers.org/howto/getopts_tutorial)
  - bash man - SHELL BUILTIN COMMANDS
 
-### Flow Contorl - for
+### Flow Control: for
 
 **Traditional shell form**
 
@@ -2903,13 +2916,13 @@ A form of parameter expansions was already encountered - shell variables.
 
 *Basic Parameters*
 
- - `$a`, `${a}` - when epanded, it becomes whatever the variable a contains
+ - `$a`, `${a}` - when expanded, it becomes whatever the variable a contains
     - braces are required if the expansion is adjacent to other text
     - also to access position parameters higher than 9: `${11}`
 
-*Expansions to manager empty variables*
+*Expansions to manage empty variables*
 
-Several parameter expansions are intended to deal with empty and nonexistent variables. Usfeul for handling positional parameters and giving default values to parameters.
+Several parameter expansions are intended to deal with empty and nonexistent variables. Useful for handling positional parameters and giving default values to parameters.
 
  - `${parameter:-word}` - if parameter is unset or empty, the expansion results in word; if not empty, the value of parameter
     - `echo ${foo:-"substitute if unset"}`
@@ -2938,10 +2951,10 @@ Both forms perform identically - return the names of existing variables with nam
     - the # removes the shortest match, while the ## removes the longest
  - `${parameter%pattern} ${parameter%%pattern}` - same like the previous expansion, but remove text from the end
  - `${parameter/pattern/string} ${parameter//pattern/string} ${parameter/#pattern/string} #{parameter/%pattern/string}`
-    - search and replace; first form, only the first occurrence, second all of them; the third required the match to occur at the beginning of the string, the last one, at the end
+    - search and replace; first form, only the first occurrence, second all of them; the third requires the match to occur at the beginning of the string, the last one, at the end
     - if '/string' is omitted, pattern will just be deleted
 
-These kind of parameter expansions can replace some usage of commands like sed or cut, making script more efficient.
+These kind of parameter expansions can replace some usage of commands like sed or cut, making scripts more efficient.
 
 *Case conversion*
 
@@ -2952,7 +2965,7 @@ These kind of parameter expansions can replace some usage of commands like sed o
  - `declare -u upper`
  - `declare -l lower`
 
-The following parameter expansions can perform case conversions, with some extra capabilities than declar
+The following parameter expansions can perform case conversions, with some extra capabilities than declare
 
  - `${parameter,,pattern}` - expand into all lowercase; pattern - optional shell pattern (e.g. [A-F]) that will limit which characters are converted (bash man for full set of patterns)
  - `${parameter,pattern}` - only the first letter to lowercase
@@ -3057,7 +3070,7 @@ To append element at the end of an array the shell provides an easy solution: `+
 Sorting an array can be done easily through a little coding - command subsititution plus a secondary array
 
  - `a=(f e c d b a)`
- - `a_sorter=($(for i in "${a[@]}"; do echo $i; done | sort))`
+ - `a_sorted=($(for i in "${a[@]}"; do echo $i; done | sort))`
 
 To delete an array, the `unset` command must be used. It can also be used to detele single array elements.
 
@@ -3101,7 +3114,7 @@ The difference between group commands `{ }` and subshell `( )` is that for the s
 
 The environment "problem" is similar to pipe-ing input into `read`. A pipe creates a subshell, so the read command will modify variables in its own environment only. The shell does provide a special form of expansion for this: process substitution.
 
-: - `<(list_of_commands)` - for processes that produce standard output
+ - `<(list_of_commands)` - for processes that produce standard output
  - `>(list_of_commands)` - for processes that intake standard input
 
 For the "read problem"
@@ -3127,7 +3140,7 @@ Several substitutions can be used - basically, where a file can be put in a comm
 
 **Traps**
 
-Scripts can respond to signals like any regular process. Large complicate scripts are more likely to be affected by the user logging of, or the system rebooting, or other interruptions. A signal handling routine can come in handy to exit in an orderly fashion (save state, delete temporary files etc).
+Scripts can respond to signals like any regular process. Large complicated scripts are more likely to be affected by the user logging of, or the system rebooting, or other interruptions. A signal handling routine can come in handy to exit in an orderly fashion (save state, delete temporary files etc).
 
 `bash` provides traps for this
 
