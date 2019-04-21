@@ -38,7 +38,7 @@ William Shots
 	- [Top-Down Design](#top-down-design)
 	- [Flow Control: Branching with if](#flow-control-branching-with-if)
 	- [Reading Keyboard Input](#reading-keyboard-input)
-	- [Flow Control: while, until](#flow-control-while,-until)
+	- [Flow Control: while, until](#flow-control-while-until)
 	- [Troubleshooting](#troubleshooting)
 	- [Flow Control: Branching with Case](#flow-control-branching-with-case)
 	- [Positional Parameters](#positional-parameters)
