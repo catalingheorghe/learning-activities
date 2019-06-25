@@ -82,7 +82,7 @@ To control tmux, a command prefix is also used, like in GNU screen, but it is `C
  - `Ctrl-b p` - previous window
  - `Ctlr-b 0..9` - window number 0..9
  - `Ctrl-b w` - show window list
- - `Ctrl-b .` - rename current window
+ - `Ctrl-b ,` - rename current window
 
 A new window can also be created with `tmux neww -n Window1` from the current window.
 
