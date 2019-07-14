@@ -8,7 +8,7 @@ TODO
 
 When building for embedded, the tools are being run on one platform while building the application for another platform. This set of tools are collectively called *cross-platform development tools*. Note that even if the architecture of the target system is the same as the development station, it is still highly recommended to use a dedicated set of compilation tools (toolchain), instead of using  the native one.
 
-You can either get pre-built binaries from various providers or vendors (windriver, linaro, mentographics etc or distributions like ubuntu, debian), or build the tools yourself.
+You can either get pre-built binaries from various providers or vendors (windriver, linaro, mentor graphics etc or distributions like ubuntu, debian), or build the tools yourself.
 
 For building the tools yourself, the de-facto toolset is the one from GNU.
 
@@ -45,24 +45,22 @@ Usual components
  - C library
  - headers
  
-Other components usually include debuggers, profilers and other utility tools.
-
-This translates into the GNU packages binutils, gcc and then the C library (e.g. glibc), plus the Linux kernel headers.
+Other components usually include debuggers, profilers and other utility tools. In the GNU ecosystem, this translates into the packages: binutils, gcc and then the C library (e.g. glibc), plus the Linux kernel headers. For debugging, gdb.
 
 The following triplet denotes the systems involved
 
- - build - where you build your toolc=pp hhain
+ - build - where you build your toolchain
  - host - where you use your toolchain
  - target - where the software built by the toolchain will run
 
 Usually, the build and host are the same.
 
-In GNU configure and build system, the part of the triplet are specified in a standardized format (*tuple*). Full form is `arch-vendor-os-libc/abi`
+In GNU configure and build system, the parts of the triplet are specified in a standardized format (*tuple*). Full form is `arch-vendor-os-libc/abi`
 
  - arch - the system's chip architecture. Little endian usually denoted by an `el` suffix. 
  - vendor - a specific maker or family of boards; no effect on the toolchain, can be unknown or omitted as it is ignored by autoconf
- - os - used mainly for GNU/Linux and even then, sometimes, left out; only denotes the kernel type, not specific version. Example: `none`, for bare-metal, or linux.
- - libc/abi - a string denoting the combination of c library and ABI in use; can be all kind of systems or even directly the format (like ELF) if it is bare-metal
+ - os - used mainly for GNU/Linux and even then, sometimes, left out; only denotes the kernel type, not specific version. Example: `none`, for bare-metal, or `linux`.
+ - libc/abi - a string denoting the combination of C library and ABI in use; can be all kind of strings or even directly the format (like ELF) if it is bare-metal
 
 Some examples
 
@@ -75,7 +73,7 @@ The tools (like gcc, ld, objdump) are usually prefixed with this naming.
 
 Note that a different ABI or different word size (32 vs 64) is also cross-compilation. A native toolchain means *build == host == target*.
 
-The build, host, target translate to `---build`, `--host`, `--target` in autoconf `configure`. If no specified, a native configuration and build is presumed.
+The build, host, target translate to `---build`, `--host`, `--target` in autoconf `configure`. If not specified, a native configuration and build is presumed.
 
 #### Components of a Linux cross-toolchain
 
@@ -88,7 +86,7 @@ Four core components
 
 **Binutils**
 
-Contains utilities to manipulate binary object files: assembler (as), linker (ld) and others like objdump, readelf, strip etc.
+Contains utilities to manipulate binary object files: assembler (as), linker (ld) and others, like objdump, readelf, strip etc.
 
 Needs to be configured for each CPU architecture. Example: `./configure --target=arm-buildroot-linux-gnueabihf --with-sysroot=PATH` (autoconf will guess the build and host from the local system configuration).
 
@@ -100,10 +98,10 @@ GNU Compiler Collection project. C, C++, ADA, FORTRAN and backends from many CPU
 
 Source -> intermediate representation -> assembly source for CPU architecture. The `as` tool from binutils produces the machine code from that.
 
-It provides compilers (`cc1` for C), but you will use the *compiler driver*, `gcc`, which is wrapper that calls the compiler, linker, assembler.
+It provides compilers (`cc1` for C), but you will use the *compiler driver*, `gcc`, which is a wrapper that calls the compiler, linker and assembler.
 It also provides runtime libraries if you want to run these programs on your target (`libgcc`) or even if you want to run a cpp or fortran program (`libstdc++`, `libfortran`). Plus the header files for the standard C++ library.
 
-The build of gcc is done two steps.
+The build of gcc is done in two steps.
 
 There are also some dependencies for the building with gcc: some arcane math libraries (`mpfr`, `gmp`, `mpc`) used at build time for floating point calculations. They are not needed on the target, they are needed on the host machine to build something with gcc for the target (so they are part of the toolchain as well, in a way).
 
@@ -118,17 +116,17 @@ To produce the headers, the kernel build has a couple of targets that produce sa
 
 In the kernel sources the `uapi` directories are the user-space visible headers.
 
-Linux 4.8 install over 700 header files via the `headers_install` target - kernel system calls, data structures etc.
+Linux 4.8 installs over 700 header files via the `headers_install` target (kernel system calls, data structures etc.).
 
-Note: the kernel to userspace ABI is backward compatible ("do no break userspace"). The header used for the build must be at least as old as the kernel that will run on your system.
+Note: the kernel to userspace ABI is backward compatible ("do not break userspace"). The header used for the build must be at least as old as the kernel that will run on your system.
 
-The version of the kernel headers in use in your toolchain, there is a file in the linux-kernel that will get to your toolchain install dir: ` $ cat arm-none-linux-gnueabi/libc/usr/include/linux/version.h`, see `LINUX_VERSION_CODE` and `KERNEL_VERSION`.
+To determine the version of the kernel headers in use in your toolchain, there is a file in the linux kernel that will get to your toolchain install dir: ` $ cat arm-none-linux-gnueabi/libc/usr/include/linux/version.h`, see `LINUX_VERSION_CODE` and `KERNEL_VERSION`.
 
 **C library**
 
 Implementation of POSIX standard functions and other standards and extensions.
 
-The standard one most often used is the GNU C library (glibc). It is full featured and standard compliant, but can be heavy on resources for small embedded systems (under 16 MB of flash and small RAM). As its primary target is not embedded systems, the code is usually optimized of speed, not space.
+The standard one most often used is the GNU C library (glibc). It is full featured and standard compliant, but can be heavy on resources for small embedded systems (under 16 MB of flash and small RAM). As its primary target is not embedded systems, the code is usually optimized for speed, not space.
 
 Alternatives can be 
 
@@ -137,9 +135,9 @@ Alternatives can be
  - bionic (for Android)
  - dietlibc (tiny)
  - klibc (tiny)
- - newlib (mostly for bare-metal, can be used to build bootloaders and the even the Linux kernel but not userspace code).
+ - newlib (mostly for bare-metal, can be used to build bootloaders and the even the Linux kernel but not userspace code)
 
-What glibc/uclibc-ng/musl provides is the dynamic linker ('ld.so'), the C library itself (`libc.so`) and other additional libraries (`libm`, `librt`, `libpthread`, `libutil`, `libnsl`, `libresolv`, `libcrypt`), the standard C library headers.
+What glibc/uclibc-ng/musl provide is the dynamic linker ('ld.so'), the C library itself (`libc.so`) and other additional libraries (`libm`, `librt`, `libpthread`, `libutil`, `libnsl`, `libresolv`, `libcrypt`), the standard C library headers.
 
 Some points about glibc:
 
@@ -202,7 +200,7 @@ The sysroot is the logical root directory for headers and libraries. It is where
 
 Gcc and binutils are built with the same location for `--with-sysroot`. And there we also install the kernel headers and the C library. If the toolchain has been moved, gcc will still find it, if it is a subdirectory of the `--prefix`.
 
-Can be printed with `--print-sysroot` and can be overridden at runtime with `--sysroot` (this is leveraged by, for example, buildroot to build their own sysroot when building for an embedded linux target).
+Can be printed with `--print-sysroot` and can be overridden at runtime with `--sysroot` (this is leveraged by, for example, by buildroot to build their own sysroot when building for an embedded linux target).
 
 Multilib toolchains
 
@@ -254,7 +252,7 @@ For example, on ARM, which is an architecture that has a lot of ABIs
 
 Toolchain is only the strict set of compiler, C library, binutils.
 
-An SDK also offers other libraries that be linked with and that can be run on the target (networking, graphics, etc) and other native tools that help in building the software.
+An SDK also offers other libraries that can be linked with and that can be run on the target (networking, graphics, etc) and other native tools that help in building the software.
 
 Yocto, for example, can use an existing toolchain as input, or build its own. A build system like yocto, besides producing a root filesystem, can also produce and SDK to allow application developers to build applications for the target.
 
