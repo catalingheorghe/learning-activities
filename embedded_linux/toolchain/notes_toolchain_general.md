@@ -270,6 +270,9 @@ TODO
 
 Specialized in building cross-compilation toolchains.
 
+ - http://www.ebadf.net/2012/03/09/crosstool-ng/
+ - https://github.com/bootlin/toolchains-builder/issues/2
+
 #### Embedded Linux build systems
 
 Yocto, Buildroot, OpenWRT can also build toolchains.
