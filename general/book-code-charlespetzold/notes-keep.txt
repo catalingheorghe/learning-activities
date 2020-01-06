@@ -1,0 +1,193 @@
+
+Peripherals = anything besides memory that is connected to a microprocessor. A cpu can read/write.by using certain addresses. In some microproc their addresses replace some addresses that would be used for memory (memoryapped i/o). Some cpus have reserved addresses, called i/o ports. 8080 is like this, has 256 reserved addresses. Instructions OUT IN - use the acccumulator and a port address.
+
+Signal from peripherals - interrupts on INT pin of cpu. Instructions to enable and disable interrupts. iNTE output signal says of interrupts have been enabled.
+
+Cpu respond to interrupts by fetching an instruction. Peripherals usually supply one of the RST (restart) instructions from 0 to 7 - each represent a jump to a predifined memory location (0000h, 00008 ...), where there is code to handle the interrupt. RST saves the PC, like a call.
+
+NOP instruction tells the cpu to do nothing.
+
+
+The motorola 6800 has similar concepts but different register set, no i/o port separated and a totally different instruction set. Also, it is big endian, while 8080 is little endian.
+
+8080 was used in altair 8800, the world' first home pc.
+
+8086 was 16 bit. The start of the x86 family, including the 33 bit processor 386.
+
+Apple switched from motora 68000 (68k) to powerpc in 94. Risc cpu - each instructions same length, usually, simple operations.
+
+More and more transistors: data wifth (from 4 to 32 bits), cache ram array in cpu for instructions, pipeline (fetching the next instructions while executing, jump prediction etc).
+
+# ascii characters
+
+Carriage return (go to start of line) and line feed (move to next line) come from teletypewrite that used Baudot code. Baudot code uses 5 bits; it has shift codes (that change meaning of next elements, until a marker) to represent numbers, punctuation.
+
+Ascii uses 7 bits. Uppercase and lowercase are 20h apart - makes it easy to change uppercase lowercase. 95 graphic codes (have a vidual representation) and 33 control codes (have some function; many obscure because they were for teletypewriters)
+
+Ibm had their own 8bit character code, based on punch cards that were.used in mainframes.
+
+Ascii is usually stored as 8 bits, so a numver of extensions were created to repsent more literals etc. Still not enough for ideographs like japanese.
+
+Unicode was created to address that. Contais ascii at the beginning. 16 bits charcter codes, plenty of space. But double the storage requirement. (An average book is around 1 MB in ascii, 2 in unicode)
+
+Us library of congress - 20 terrabytes of ascii text (estimate)
+
+# get on the bus
+
+Connection between mainboard (microprocessor, control ic, ...) and other expansion boards (ram, storage, etc). Contains address signals, data input and output, control signals.
+
+First bus standard was ISA from the first IBM pc. 20 address, 8 data combined input output, 6 interrupt requests, 3 dma requests. (Dma allow peripherals to take over the bus and access memory directly, without cpu involvement).
+
+Buses can be ougrown in the number of signals, or in speed. After isa came the 32bit eisa and PCI. 
+
+Tri-state output is an extra statr besides 1 (over 2.2v) or 0 (below 0.4v): nothing. This is thr state of data output signals when chip select signals are not active. This way, multiple chips can have combined outputs connected to the bus.
+
+StaticRAM requires more transistors per bit, but does not require support circuits for periodical refreshes, like dram.
+
+You don wan't to fill the memory space of your cpu with memory; you mustbleave space for the output device and others.
+
+Next pages go through video adapters, tv set, resolution and color how much memory donyou need; then a keyboard and hownit can determine which key was pressed. Then finally storage, magnetic storage - first tapes, which are sequential, then disks (floppy and fixed). Buses for connecting storage are scsi, eisa, ide. All use dma to talk directly with ram. (Address lines from cpu only address ram)
+
+# operating system
+
+When you start this new pc it will start executing random stuff from ram. 8080 starts executing from 0000h upon being taken out of reset. Eg of initialization code: put the memory for the video display to spaces, set sp to a valid region, set the cursor of the video display to first char, enable interrrupts, halt.
+
+Now, the keyboard interrupt handling code is more complex. It must take the key and convert it to ascii, put in the video memory and move the cursor, or it must handle the control character (like a backsapce to delete) or it can process the content of thr entire line after enter was pressed. And here you can have 3 commands: writr, display, run that will allow you to program your computer.
+
+This code can be in a eprom (erasble programmble rom) and loaded in the intialization code at the address for the keyboard interrupt. With dip switches you can set the rom at address 0000h and the ram at a higher address in the memory space.
+
+You may then want to store and load code to and from the disk. You must keep track of sectors, block size. Why not a file system? We're moving towards a real os, so better to take a look at some real examples. CP/M first 8 bit os (mid 70s by gary kildall) - filesystem really simple - contains a directoru metadata with room for info about only 65 files, but allowed files to have names and allowed to store content in nonconsecutive sectors. This where 3 letter extensions came from.
+
+The code for the cp/m is on thr first two tracks of disk. The rom on a cp/m pc does only: take the first 128 byte sector and put it into ram (it bootstraps the os - it pulls it up by the bootstraps), and execute it. This area contains code to load the rest of cp/m into memory - booting the os. Page 338 shows how cp/m ends up arranging the memory usage. Bios, filesystem code and command processor in the highest region of memory, then space for transient code or data - this is thr place where thr content of a COM file is loaded and then executed (editor, program to copy data to and from peripherals - utility programs, or larger applications like spreadsheet calculators).
+
+Cp/m provides subroutines so that programs can access the video output, the keyboard inlut and the disk - the programs do not access them directly. - easy acces to the hardware - API.
+
+Cp/m was the influence of qdos (quick and dirty os - 16 bit), which was licensed by microsoft under MS-DOS. It used FAT (file allocation table) for fs, invented at microsoft. Instead of doing a CALL 5 to call an os subroutine, it switched to a software interrupt (INT 21Hh - the program does not need to know the address anymore).
+
+Msdos was used in IBM pcs. It allowed direct access to hardware (even though there was an api), so many programs relied on tje ibm pc hardware idiosyncrasies.
+
+Msdos 2.0 83 moved to hierarchical fs - a directory acn contain directories. Borrowed from unix. Multiple variants of unix as at&t licensed it to muliple parties. Common philosphy of using files and stringing commands. Unix was designed for large computers with multiple users at the same time (timesharing). The servicing of multipel inputs and outputs (terminals) is called multitaksing and makes the os more complicated thannsingle task msdos (concurrency on files, memory managemnt for different running programs, virtual memory). Then gnu, then linux.
+
+Large and sophisticated os, like apple macintosh and windows focused on graphics andrich video.
+
+# fixed floating point
+
+Real numbers: rational numbers - can be expressed as a ratio of integers; irrational numbers - can't be expressed as a ratio (square root 2, for ex; pi). Some.irrational numbers are transcendental numbers - can't be expressed as the solution of an ecuation with whole number coefficients.
+
+Imaginary numbers - square root of negative numbers.
+
+Complex numbers - combination of a real and an imaginary part.
+
+To store fractional (rational) numbers you could use BCD (binary coded decimal) - a nibble (4 bits) represent a digit, an extra nibble for sign bit. You have to consider the number of decimals knows, for example 2. Hence, "fixed-point". Not good if thr range is very big, from tiny to huge (you need to use too many bytes).
+
+This is wherr scientific notation comes in. 490 billion is 4.9 * 10^11. 4.9 is called the fraction / characteristic / mantissa (more with logarithms) / significand (more with computers). Exponent is the power to which 10 is raised. Normalized form: significand larger than 1 and smaller than 10.  All of this can be applied to base 2 as well. Note that the normalize form always means that thr significand is a 1.xxxxx
+
+Floating point is the name for storing this scinetific notation format. Thr standard of encoding was defined by ieee. It offers two options: singlr precision (4 bytes) and double precision (8 bytes).
+
+Singlr precision: 1 bit sign, 8 bits exponent, 23 bit significand. The 1 to the left of thr "binary point" is not included in the 23 bits. Form thr exponent you must subtract a bias, whichnfor single prec, is 127.
+
+24 bits of precision (significand) in binary, that's equivalent to 7 decimal precision. Unlike fixed point, it can be very accurate or not. It is accurate to the 1 part in 2 to the 24, so if the number is very big, it will gave some gaps. That is why fixed point is preferred when dealing with money
+
+Double precision uses 8 bytes, 11b exponent, 52 fraction.
+
+All floating point operations can be done in software using operations on integers. But some computer have dedicated machine  code for it. First that did was thr ibm 704 (1954) - floating point addition, subtr, mult division in hardware. This capability came to the pc in 1980 with intels chip: mathc coprocessor / floating point unit (8087) - must be used in conjucntion with a microprocessor. (Trigonometry, exponents logarithms ...). It has routines in rom memory for the functions (microcode). The software neede to use the specific machine code instructions of thr fpu (after an escape instruction for the cpu) to be faster. And it was not in a pc, by default, so it was extra work.to support both with and without. From 1989 486dx, the fpu is inside thr cpu.
+
+# languages high and low
+
+The cp/m os for the 8080 had a text editor and an assembler, so you didn't beed to hand assemble the code, aka write the machine code bytes. Thr first assembler for a cpu needs to ve written in machine code, but then it can be used to create newer versions, oe even cross-assemble another assembler that produces code to run on another cpu.
+
+Assembly language is very tedious. And it is not portable. Low level language.
+
+High level language is anything not assembly language. Must define a syntax and must have a compiler to transform into machine code.
+
+High level.languages are more.portablr, if a compiler.exists, but may not take advantage of thr cpu's full instruction set. Nevertheless, as cpus became more complicated, writing assembly became trickier.
+
+Eratosthenes, around 200bc, librarian of alexandria, is known for calculating thr circumpherence the earth. The sieve of eratosthenes is an algorithm to find the prime numbers in a range - basically taking each number and eliminating its multiples.
+
+Programming - art or science. Richard feynman: it's like engineering, all about grtting something to do something.
+
+Fortan was designed by ibm in the 50s, with science in mind. It even has support for complex numbers.
+
+Algol was a language that predates many modern c like languages. Block oriented.
+
+Cobol (common business oriented language) was the first language designes for business people. Read records (collection of information in a consistent manner) and generate reports.
+
+Basic was a language that did not require explicit declaration of types. Many subsequent inmplementations have been in the form of interpreters (executes source code as it reads it, does not create an executable first). Bill gates and paul allen wrote a Basic interpreter for ms-dos on altair 8800.
+
+Pascal and thrn turbo pascal (which was commercial, came with and ide) was the next big hit.
+
+C was created around 1970 at bell tel lab, dennis ritchie, in conjuction with unix. Derived from a language called B (basic combined progeamming language). Unix was rewritten in c so that it was portable.
+
+All algol -like languages were designed based on the con neuman architrcture. One that is not, is LISP (list processing) - designed for use in art intelligence.
+
+Algol like languages dominatr and have picked up new tricks: object oriented programming 
+
+# the graphics revolution
+
+At first, screens were used like teletypewriters, rolling paper. Then, screens (crt) were taken advantage of by using escape codes (eg mive thr cursor at a position).
+
+PARC (pallo alto) came up with an internaL design, of windows, buttons etc (1972 73). The mouse was beginning its use. Strve jobs visitrd and liked it - macintosh (1984). Note: at this point, memory for graphics were.mapped directly in the cpu memory space; most programs accessed it directly, for speed.
+
+A graphical os for the ibm pc also followed, windows 1.0 (1985).
+
+Programming applications for gui was not easy in languages like pascal, ir c. At parc they invented smalltalk, oop ( around 72).
+
+Two type of graphics: vectot (lines, shapes - computer aided design), raster (pixels, bitmap graphics - pictures).
+
+Bmp and gif use lossless compression. Jpeg can use lossy.
+
+Sounds: cd hit in 983 (sony, philips) - 74 minutes of digitized sound (veethovens ninth symphony). Analog to digital: stereo, 44100 samples of 2 bytes each per second. Can also just store data (about 660 megabytes).
+
+The first remote opeartion kf a computer (a relay computer) was in 1940 (geoege siblitz).
+
+Modems are modulators/demodulators that transformed a continuous sound wave to bits and back.
+
+Internet works.on transferrind data via layers of peotocols. All dece tralized. Web is based on htttp and html. Browsers disolay html. Code can run on the server or on thr client. 
+
+Java is between a compiled language and an interpreted one. The result of compilation is java byte code, which is for an imaginary computer called a jvm.
+
+Like the initial morse code, fiber optic cables are the future of.communication.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

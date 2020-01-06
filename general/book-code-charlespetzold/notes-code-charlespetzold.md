@@ -151,4 +151,34 @@ The first digit has a meaning (regular code, has to be weighed, coupons etc). Ne
 
 Morse and braille also can be encoded into binary.
 
+## 10. Logic and Switches
+
+Ancient greeks considered analyzing logic in language to help in the search of truth (4th cent bc). Eg: syllogism - drawing a conclusion from two premises.
+
+George Bool, around 1850, transformed logic into mathematic - boolean algebra. The operands are sets, or classes and the operators are union, intersection. Using it you can prove a syllogism, for example. (All men are mortal, Socrates is a man, Socrates is mortal).
+
+The numbers 1 and 0 can be used to represent yes and no as satisfying criterias of being in a class or not. *Or* and *and* operators can help with complex selection criterias.
+
+But what if you transform 1 and 0 into a switch, open or closed, and *or* and *and* into switches in parallel and in series. Then, if the circuit closes (telegraph relay rings for eg), you made the connection between boolean logic and electronics. Like the selection of a cat based on a set of specific criterias (sex, color, neutered).
+
+![Switches](10-logic-switches.png)
+
+Nobody made this connection in the 19th century, not even Babbage, credited to invent the precursor to modern computers using gears and levers.
+
+## 11. Gates
+
+Shannon (1930s) who wrote about the theory of communication made the connection between switches, or even better, relays, and boolean algebra.
+
+A relay has an input and an output. A combination of relays is a logical gate.
+
+ - And
+ - Or
+ - Inverter
+ - Nor
+ - Nand
+ - Buffer
+ - 2 to 4 line decoder (2 inputs, one of 4 outputs trggered)
+
+De Morgan worked on boolean algebra in the same time as Bool. De Morgan's laws: negation of operands is the negation of the result of the other operation.
+
 
