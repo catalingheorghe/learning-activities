@@ -179,6 +179,26 @@ A relay has an input and an output. A combination of relays is a logical gate.
  - Buffer
  - 2 to 4 line decoder (2 inputs, one of 4 outputs trggered)
 
+Below is an AND gate made out of two relays.
+
+![AND Gate](11-gates-and.png)
+
 De Morgan worked on boolean algebra in the same time as Bool. De Morgan's laws: negation of operands is the negation of the result of the other operation.
 
+## 12. A Binary Adding Machine
 
+8 bit adder
+
+Start with adding 1 bit, you have a sum and a carry out. Carry out is an AND gate; the sum is a new gate, an XOR gate (OR gate, NAND gate, both in an AND gate). This is a half adder, as it does not take a carry in. With two half adders, the second one to treat the carry in, and an OR gate, you have a full adder for one bit with carry in and out.
+
+Cascade 8 of them and you have an 8 bit adder. Cascade two of these and you can add 16 bit numbers.
+
+![16 Bit Adder](12-16bit-adder.png)
+
+This 8 bit adder uses 144 relays.
+
+It is a ripple carry. More efficient but more complex adder is a lookahead adder.
+
+Computers were first made with relays, then with vacuum tubes, now with transistors.
+
+## 13. 
