@@ -201,4 +201,75 @@ It is a ripple carry. More efficient but more complex adder is a lookahead adder
 
 Computers were first made with relays, then with vacuum tubes, now with transistors.
 
-## 13. 
+## 13. What About Subtraction
+
+The logic of subtraction, of borrowing, is not as straightforwatd as addition. You could use the 9s complement (subtract from all 9s) to avoid borrowing, but you still need a subtraction at the end. Note: one's complement is easier to calculate as it turns out to be an inverse of the bits.
+
+E.g. of subtraction without borrowing, using nines' complement: 
+
+```
+    253 - 176 = ?
+
+	253 - 176 + 1000 - 1000 = 
+    253 + (999 - 176) + 1 - 1000 = 77
+```
+
+To represent negative numbers, what if you knew what range of numbers you have and use the upper range of positive numbers to represent the negative ones. Eg: 128 is -128, 255 is -1, 0 is 0, 1 is 1, 254 is 254. Now you can just use addition for any numbers. Only thing is to take care of overflows and underflows, considering the sign bits of the two operands and of the result.
+
+This representation is 2's complement (to calculate: one's complement (inverse) and then add one 1; back it is the same way).
+
+## 14. Feedback and Flip-Flops
+
+Using an inverter (relay based) connected back to itself, you get an oscillator, a circuit that quickly alternates between 1 and 0. With a switch, that can make an electric bell or buzzer.
+
+Without the switch, you have an oscillator. The oscillator's changes start without any human intervention. Output is a clock diagram. Cycle is the time between a change in output and then back - duration depends on how the relay is built (period). Frequency is 1/period (cycles per second, hertz).
+
+Hertz (1856 - 1894) was the first person to transmit and receive radio waves. First used in germany 1920s.
+
+![Oscillator](14-oscillator.jpg)
+
+Two NOR gates with a feedback loop creates a special circuit, one that has two stable states - a flip-flop. Reset-Set flip-flop with outputs Q and Q-bar. When "set" is 1, Q is 1. When both inputs are 0, it holds the previous outputs, it remembers. "R-S flip-flop" reset set.
+
+![Flip-flop](14-D-flip-flop.png)
+
+![RS diagram](14-RS-flip-flop.jpg)
+
+If we want to save the state (lets say "data") at a particular point in time (when we activate a "hold that bit" signal), we add two AND gates to the two reset and set (with the hold). Also we can make the reset the inverse of the set since we care only about holding the change, not when both are 0. Set is now "data". We have a level-trigerred D-type flip-flop, or latch (latches on to one bit of data and keeps it). The hold signal is usually labelled clock. Level-trigerred because it holds data when that signal is at a particular level. (D stands for data). 1 bit memory!!
+
+![RS flip-flop](14-RS-flip-flop.jpg)
+
+Adding an OR gate with a clear signal on the reset input lets you clear the latch.
+
+8bit adder with latches pg 170
+
+![8bit adder](14-8bit-adder.jpg)
+
+Edge triggered flip flop takes the value data only when the clk changes from 0 to 1, so it may be preferred to avoid changes in data. This is built with two stages of R-S flipflops with the clock inversed for the first of them (pg 171). Basically the first stage acts like a buffer of the data value, and when the clock changes from 0 to 1, the second stage will show the stored data (which can now change, as it does not matter).
+
+Symbol: arrow pointing up in the truth table and a small angle bracket in the diagram.
+
+![Edge triggered](14-D-edge.jpg)
+
+An oscillator with an edge trigerred flipflop with Qbar connected to Data input makes a frequency divider. The outputs Q and Q bar change on every cycle of the clock (half the frequency). Note that the relays in the oscillator must be much slower than the rest of the relays, so they can keep up.
+
+If you string 8 of these together you get a ripple counter (counts 8 bit numbers). (Pg 176). When all output are 0 again it has gone through 256 cycles, so with measuring the time you have the frequency of the initual oscillator.
+
+![Frequency Divider](14-freq-div.png)
+
+![Ripple Counter](14-ripple-counter.png)
+
+![Binary Numbers](14-ripple-counter-output.png)
+
+A flipflop with an extra preset input will make Q 1 when preset is set. And an extra clear input will makeit 0 (preset and clear should bot be 1 at the same time).
+
+![Preset Clear](14-preset-clear.jpg)
+
+## 15. Bytes and Hex
+
+Byte - 1960s ibm's system/360 computer - group of 8 bits. Enough for most alphabets, grayscale photographs (256 shades of gray distinguished by the human eye). Storage format for numbers: BCD, binary coded-decimal (later).
+
+Nibble - half a byte.
+
+A byte is quite long in binary. In octal it is shorter (from 000 to 377), so an octal representation of a 16 bit is not the same as the representation of the two bytes. Base 16 fits better - groups of 4.
+
+
