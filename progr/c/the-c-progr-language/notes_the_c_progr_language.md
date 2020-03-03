@@ -40,6 +40,11 @@ Assignments associate from left to right, so this is why you can write something
 
     `a = b = c = 0`
 
+**Arguments - call by value**
+
+All function arguments are passed "by value", meaning that the called function receives a copy of its arguments, not the originals. To really modify the variable in the calling function, the address to that variable must be passed as an arguments (pointer).
+
+
 
 
 
