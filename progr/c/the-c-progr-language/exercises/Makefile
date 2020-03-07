@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -Wall
+CFLAGS := -Wall -Werror
 
 BINDIR := ./bin
 
@@ -14,7 +14,7 @@ $(BINDIR):
 	mkdir -p $@
 
 $(BINDIR)/%: %.c
-	$(CC) $(CFLAGS) -Werror -o $@ $<
+	$(CC) $(CFLAGS) -o $@ $<
 
 clean: clean_all
 
