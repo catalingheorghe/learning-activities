@@ -160,6 +160,25 @@ when referring to "addresses of functions".
 
 TODO
 
+## Standard Library, ANSI Standard
+
+### String Functions
+
+Header: `string.h.`
+
+Functions that start with *str* and deal with character arrays.
+
+None of the functions, not even the *n*-type ones like `strncat`, `strncpy`,
+explicitly take care that the target string will be a NUL-terminated one. What
+the *n* functions do is limit the bytes that are to be modified in the
+destination; also, if the *source* has fewer bytes than *n*, the remaining bytes
+will be `\0`.
+
+Functions that start with *mem* aim manipulate objects as character arrarys.
+
+Note that only `memmove` can deal with arrays that overlap. For all other
+copy functions in this header, the result would be undefined.
+
 
 ## Future work
 
