@@ -89,6 +89,41 @@ Note that other licenses give users the explicit permission to use the work unde
 
 **Machine parsable license identifiers** in each file is needed. Because text boilerplate is hard to parse, a machine parseable identifier has been introduced by https://spdx.org/.
 
+**GCC Runtime excpetion notes**
+
+some info regarding gcc lincense(s)
+
+1.
+update, after some more digging:
+
+> What libraries does the GCC Runtime Library Exception cover?
+>
+>    The GCC Runtime Library Exception covers any file that has a notice in its license headers stating that the exception applies. This includes libgcc, libstdc++, libfortran, libgomp, libdecnumber, >    libgcov, and other libraries distributed with GCC.
+
+the entire info is here: https://www.gnu.org/licenses/gcc-exception-3.1-faq.html
+
+what we care about is libgcc - this copied at runtime in the rootfs (besides the actual idea of compiling with gcc - various headers that may get copied into the software etc)
+
+2.
+And the runtime exception itself is clear:
+
+> You have permission to propagate a work of Target Code formed by combining the Runtime Library with Independent Modules, even if such propagation would otherwise violate the terms of GPLv3,
+
+https://www.gnu.org/licenses/gcc-exception-3.1.html
+
+3.
+I have looked in the gcc source-code. There is a folder `libgcc`. In that folder I did some grepping and looked at some files.
+
+ - there are files under "lesser gnu public license". All of these file seem to be under version 2.1
+ - there are files under "GPL version 3 with GCC Runtime Exception 3.1"
+ - there are files in "Public domain"
+
+so, my conclusions,
+
+ - the runtime parts that we care about (libgcc) are a mix of "GPLv3+GCC Runtime Exception", LGPLv2.1 or later+also an exception text, public domain
+ - **I believe that this makes the "gcc-linaro" and "gcc-oselas" licenses that we show in the table actually be "GPLv3, GCC Runtime Exception 3.1"**
+ - the end, all is good
+
 ## (Other) Resources
 
  - https://www.gnu.org/licenses/licenses.html
