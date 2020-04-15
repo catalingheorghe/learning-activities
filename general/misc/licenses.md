@@ -124,6 +124,8 @@ so, my conclusions,
  - **I believe that this makes the "gcc-linaro" and "gcc-oselas" licenses that we show in the table actually be "GPLv3, GCC Runtime Exception 3.1"**
  - the end, all is good
 
+Further update: I am not the only one who interpreted this in this manner. See this third-party licenses statement from Linksys: https://downloads.linksys.com/downloads/license/FW_LICENSE_EA9500v2_EA9500S_2.1.1.186574.pdf - search for libgcc. You will find the text of GPLv3 followed by the GCC Runtime Library Exception.
+
 ## (Other) Resources
 
  - https://www.gnu.org/licenses/licenses.html
