@@ -301,3 +301,64 @@ Number of values = 2 ^ address-lines
 64KB RAM (64K x 8) was usual in 1980s. 16 address lines. Made Out of relays, would have been around 5 million (no way...).
 
 RAM is volatile:it requires electricity to keep the values (keep the relays on the desired positions).
+
+## 17. Automation
+
+Accumulator - a latch that stores one number and then that number plus or minus a second number.
+
+Pg 208: 16 bit counter, 64K by 8 ram with control panel, 8 bit adder with 8 bit latch - input the 100 numbers into ram and then let the counter count - it will go through the numbers and add them.
+
+![Adder](17-adder.png)
+
+To do different things, we need some operations / instructions, stored in RAM as well (separate or not). For flexibility, an instruction is the operation code plus the 16 bit data address, adding up to 3 bytes.
+
+To add 16 bit numbers, we treat the low byte and the upper byte. Add with carry, new instruction, for the second byte.
+
+3 cycles for the instruction fetch, one more for the execution. The machine is smarter, but slower. There ain't no such thing as a free lunch (TAANSTAFL)
+
+We can store instructions and data in the same RAM array.
+
+![Computer](17-computer.png)
+
+We need an extra instruction to make the counter that addresses the RAM go to an address in another location. JUMP. The counter will continue from there. Now we would need some conditional jumps (if carry, if zero - both output of the adder). With this we can create loops, so a real computer, not a calculator. (Multiplications divisions etc)
+
+An "8 bit processor" means the accumulator is 8 bits, most data paths are 8 bits.
+
+Components of a processor
+ - ALU - arithmetic logical unit (8 bit inverter and adder here)
+ - accumulator - latch to store a value
+ - program counter (our 16 bit counter)
+
+Machine codes, or machine language, are the operations that the processor responds to. 3 letter mnemonics used for them (LOD, ADD, JMP ...)
+
+    LOD A,[1003h] ; load byte at addr 1003h into accumulator
+
+With this we can write machine code. Specify the address on the left and the content on the right (code or data). Labels instead of numerical addresses make things easier to change. Pg 235: code to multiply two numbers (assembly language)
+
+    ```
+    BEGIN:    LOD A,[RESULT + 1]
+              ADD A,[NUM1 + 1]       ; Add low-order byte
+              STO [RESULT + 1],A
+    
+              LOD A,[RESULT]
+              ADC A,[NUM1]           ; Add high-order byte
+              STO [RESULT],A
+    
+              LOD A,[NUM2 + 1]
+              ADD A,[NEG1]           ; Decrement second number
+              STO [NUM2 + 1],A
+    
+              JNZ BEGIN
+    
+    NEG1:     HLT
+    
+    NUM1:     00h, A7h
+    NUM2:     00h, 1Ch
+    RESULT:   00h, 00h
+    ```
+
+If the hardware can add subtract and jump conditionally, you can do the rest in software.
+
+> I've mentioned several times that all the hardware to build these devices was available over a hundred years ago. But it's unlikely that the computer shown in this chapter could have been built at that time. Many of the concepts implicit in its design weren't apparent when relay computers were first built in the mid-1930s and only started to be understood around 1945 or so. Until that time, for example, people were still trying to build computers that internally used decimal numbers rather than binary. And computer programs weren't always stored in memory but instead were sometimes coded on paper tape. In particular, in the early days of computers, memory was expensive and bulky. Building a 64-KB RAM array from five million telegraph relays would have been as absurd one hundred years ago as it is now.
+
+
