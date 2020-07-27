@@ -230,13 +230,13 @@ Hertz (1856 - 1894) was the first person to transmit and receive radio waves. Fi
 
 Two NOR gates with a feedback loop creates a special circuit, one that has two stable states - a flip-flop. Reset-Set flip-flop with outputs Q and Q-bar. When "set" is 1, Q is 1. When both inputs are 0, it holds the previous outputs, it remembers. "R-S flip-flop" reset set.
 
-![Flip-flop](14-D-flip-flop.png)
+![Flip-flop](14-flip-flop.png)
 
 ![RS diagram](14-RS-flip-flop.jpg)
 
 If we want to save the state (lets say "data") at a particular point in time (when we activate a "hold that bit" signal), we add two AND gates to the two reset and set (with the hold). Also we can make the reset the inverse of the set since we care only about holding the change, not when both are 0. Set is now "data". We have a level-trigerred D-type flip-flop, or latch (latches on to one bit of data and keeps it). The hold signal is usually labelled clock. Level-trigerred because it holds data when that signal is at a particular level. (D stands for data). 1 bit memory!!
 
-![RS flip-flop](14-RS-flip-flop.jpg)
+![D flip-flop](14-D-flip-flop.png)
 
 Adding an OR gate with a clear signal on the reset input lets you clear the latch.
 
@@ -272,4 +272,32 @@ Nibble - half a byte.
 
 A byte is quite long in binary. In octal it is shorter (from 000 to 377), so an octal representation of a 16 bit is not the same as the representation of the two bytes. Base 16 fits better - groups of 4.
 
+## 16. Memory
 
+With a level-triggered D-type flip-flop you can store 1 bit. CLK is now called write, Q is data out, and we don't care about Q bar. Easy to string 8, to make an 8 bit latch.
+
+![Bit latch](15-bit-latch.png)
+
+![Bit latch diagram](15-bit-latch-box.jpg)
+
+You can even arrange 8 latches and an 8 to 1 selector (8 inputs, 3 switches, 1 output) if you have a single data out (one lightbulb). (Pg  195)
+
+For the input part you need an 8 to 1 decoder, one data line, 8 latches. (Pg 197)
+
+Complete circuit pg 198. The 3 switches for the input and output selectors can be made common and called.. Address. This is a read/write memory, or random access memory. an 8 by one ram array.
+
+![RAM](15-ram.png)
+
+![RAM diagram](15-ram-box.png)
+
+Can be put in an 8 by 2 form, or like the initial latches, to form an 16 by 1 RAM array (with and extra selector signal, so 4 address lines).
+
+Number of values = 2 ^ address-lines
+
+1024 x 8 RAM - 1024 values of 8 bits each. 10 adress line, 8 data inputs/outputs, one write. 1 KB (kilobyte). Mega, giga, terra, penta, exa
+
+*Note that for a modem, kilo is different: 56K - kilobits not bytes (56/8 KB)*
+
+64KB RAM (64K x 8) was usual in 1980s. 16 address lines. Made Out of relays, would have been around 5 million (no way...).
+
+RAM is volatile:it requires electricity to keep the values (keep the relays on the desired positions).
