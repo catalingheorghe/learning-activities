@@ -242,7 +242,7 @@ Adding an OR gate with a clear signal on the reset input lets you clear the latc
 
 8bit adder with latches pg 170
 
-![8bit adder](14-8bit-adder.jpg)
+![8bit adder](14-8bit-adder.png)
 
 Edge triggered flip flop takes the value data only when the clk changes from 0 to 1, so it may be preferred to avoid changes in data. This is built with two stages of R-S flipflops with the clock inversed for the first of them (pg 171). Basically the first stage acts like a buffer of the data value, and when the clock changes from 0 to 1, the second stage will show the stored data (which can now change, as it does not matter).
 
