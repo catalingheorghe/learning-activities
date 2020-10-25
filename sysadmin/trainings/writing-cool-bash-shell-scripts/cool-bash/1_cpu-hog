@@ -1,0 +1,55 @@
+#!/bin/bash
+# Script that monitors the top-active process. The script sends an email to the
+# user root if utilization of the top active process goed beyond 80%. Of course,
+# this script can be tuned to do anything else in such a case.
+#
+# Start the script, and it will run forever.
+
+#CPU_THRESHOLD=80
+#CPU_INTERVAL=7
+CPU_THRESHOLD=2
+CPU_INTERVAL=3
+
+#CHECK_INTERVAL=60
+CHECK_INTERVAL=10
+
+while true
+do
+	# Check every 60 seconds if we have a process causing high CPU load
+	TUSAGE=`ps -eo pcpu,pid -o comm= | sort -k1 -n -r | head -1`
+	USAGE=`echo ${TUSAGE} awk '{ print $1 } '`
+	USAGE=${USAGE%.*}
+	PID=`echo ${TUSAGE} | awk '{print $2 }'`
+	PNAME=`echo ${TUSAGE} | awk '{print $3 }'`
+
+	echo $USAGE $PID $PNAME
+
+	# Only if we have a high CPU load on one process, run a check within 7 seconds
+	# In this check, we should monitor if the process is still that active
+	# If that's the case, root gets a message
+	if [ $USAGE -gt ${CPU_THRESHOLD} ] 
+	then
+		USAGE1=$USAGE
+		PID1=$PID
+		PNAME1=$PNAME
+		sleep ${CPU_INTERVAL}
+		TUSAGE2=`ps -eo pcpu,pid -o comm= | sort -k1 -n -r | head -1`
+		USAGE2=`echo ${TUSAGE2} | awk '{ print $1 } '`
+		USAGE2=${USAGE2%.*}
+		PID2=`echo ${TUSAGE2} | awk '{print $2 }'`
+		PNAME2=`echo ${TUSAGE2} | awk '{print $3 }'`
+		
+		echo $USAGE2 $PID2 $PNAME2
+
+		# Now we have variables with the old process information and with the
+		# new information
+
+		# mail is not usual installed (note: part of mailx) 
+		#[ $USAGE2 -gt ${CPU_THRESHOLD} ] && [ $PID1 = $PID2 ] && mail -s "CPU load of $PNAME is above ${CPU_THRESHOLD}%" root@blah.com < .
+
+		[ $USAGE2 -gt ${CPU_THRESHOLD} ] && [ $PID1 = $PID2 ] && echo "CPU load of $PNAME is above ${CPU_THRESHOLD}"
+	fi
+
+	# go to sleep
+	sleep ${CHECK_INTERVAL}
+done
