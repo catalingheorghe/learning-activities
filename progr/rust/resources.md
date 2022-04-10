@@ -43,9 +43,9 @@ Roadmaps, learning plans
 
 ### Books
 
+ - Command line rust
  - Programming Rust
    - supplemental content: https://github.com/ProgrammingRust
-
 
 ### News and communities
 
