@@ -7,6 +7,7 @@ dir/
   bin/       <-- bin targets (cargo run --bin true)
     true.rs
   src/
+    lib.ri   <-- library code that your main module calls
     main.rs
   tests/     <-- integration tests
     cli.rs
@@ -48,43 +49,47 @@ https://doc.rust-lang.org/cargo/appendix/glossary.html#target
 ### Variable, types
 
 Names
-
  - starting with `_` tells rustc I don't intend to use the variable
+ - const keyword (if scope is entire crate, convention `ALL_CAPS`)
+
+Scope
+ - by default, all variables and functions are private; `pub` in front
+ - a variable can be shadowed by using the same name
 
 Types
-
  - unit type - `()`, when there is no other meaningful value that could be
    returned. `main` returns this.
-
- - String - a string of characters.
-
- - str - a valid UTF-8 string; appropiate for literal strings;
-
+ - String - a string of characters, dynamically generated
+   - `format!` macro is like print, but returns a String
+ - str - a valid UTF-8 string; appropiate for literal strings; `&str` a borrowed
+   string
  - bool - true or false.
-
  - Option - either None or `Some<T>`, where T is any type.
    - the `unwrap` function takes the value out of `Some<T>`, panic if `None`
-
  - Result - either success, with a type, or Err.
    - `unwrap` takes value in Ok, or panic
    - `?` either unpack an ok value, or propagate the `Err` to the caller
-
+   - `and_then(fun)` - pass the T in Ok<T> to the fun
  - Vector - contiguous growable array size; same types.
-
  - std::slice - similar to vectors, but can't be resized after creation.
+ - struct - like an object, with fields
+ - Box - a pointer type for heap allocation
 
 Type aliases
 
 Example
-`type TestResult = Result<(), Box<dyn std::error::Error>>;`
-a specific type of Result, for which OK part will only be the unit type, and the
-Err part can hold anything implementing that trait, to which calls can be
+
+    type TestResult = Result<(), Box<dyn std::error::Error>>;
+
+a specific type of Result, for which OK part will only be the unit type, and
+the Err part can hold anything implementing that trait, to which calls can be
 dispatched dynamically and outcomes stored on the heap.
 
 Mutability and borrowing
 
  - variables are immutable by default (`let mut ...`)
- - a '&' shows the intent to borrow
+ - a '&' shows the intent to borrow, or lend, a reference to the variable; if
+   not used, the ownership of the value is moved, and consumed
 
 ### Control flow
 
@@ -95,11 +100,25 @@ semicolon to return that
 `let value = if winter { "cold" } else { "warm" };`
 Without an else, returns unit type.
 
+`match` - like switch; `_` covers default match
+
+Iterator trait
+ - enumerate() -> (num, Result<value>)
+
+for i in somethingiterable
+
+Infinite loop - `loop { }`
 
 
 ### Traits
 
 A trait is a way to define behavior of an object.
+
+Adding a generic trait to a struct - `#[derive(Debug)]`.
+
+ - Debug - `{:#?}`, pretty-print; or `dbg!` macro
+
+
 
 ### Crates
 
@@ -129,6 +148,8 @@ Example - `fs::read_to_string()` - note that it will read ALL the file.
 
 `predicates` - 
 
+`rand` 
+
 ### General programming
 
 **Testing**
@@ -152,4 +173,19 @@ Broad categories
 
 Even with a simple tool, there is a decent amount of "cyclomatic complexity" -
 various ways all parameters can be combined.
+
+(from chapter 3)
+
+Test Driven Development - add test, run all tests, add code, run all tests
+
+**Books mentioned**
+
+Test Driven Development - Beck
+
+Programming Rust
+
+**Projects mentioned**
+
+bat - a clone for cat, with wings
+
 
