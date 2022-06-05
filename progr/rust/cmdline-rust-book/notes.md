@@ -63,13 +63,16 @@ Types
    - `format!` macro is like print, but returns a String
  - str - a valid UTF-8 string; appropiate for literal strings; `&str` a borrowed
    string
- - bool - true or false.
+ - bool - true or false
+ - usize - primitive type, pointer-sized unsinged integer (isize - signed)
+	- also: u32/i32, u64/i64
  - Option - either None or `Some<T>`, where T is any type.
    - the `unwrap` function takes the value out of `Some<T>`, panic if `None`
  - Result - either success, with a type, or Err.
    - `unwrap` takes value in Ok, or panic
    - `?` either unpack an ok value, or propagate the `Err` to the caller
    - `and_then(fun)` - pass the T in Ok<T> to the fun
+   - convert::From and Into are useful for converting into Err types
  - Vector - contiguous growable array size; same types.
  - std::slice - similar to vectors, but can't be resized after creation.
  - struct - like an object, with fields
@@ -101,6 +104,7 @@ semicolon to return that
 Without an else, returns unit type.
 
 `match` - like switch; `_` covers default match
+ - arms can include also a guard `i.e.: Ok(n) if n > 0 => ...`
 
 Iterator trait
  - enumerate() -> (num, Result<value>)
@@ -134,21 +138,15 @@ Importing
 
 #### Useful crates
 
-`std::process` - handle external processes
-
-`std::env` - interact with environment
-The `Args` struct, returned by `args()`, contains cmd line arguments, for ex.
-
-`std::fs` - filesystem access
-Example - `fs::read_to_string()` - note that it will read ALL the file.
-
-`clap` - command line arguments parser
-
-`assert_cmd` - for testing your CLI program like a user
-
-`predicates` - 
-
-`rand` 
+ - `std::process` - handle external processes
+ - `std::env` - interact with environment
+    The `Args` struct, returned by `args()`, contains cmd line arguments, for ex.
+ - `std::fs` - filesystem access
+    Example - `fs::read_to_string()` - note that it will read ALL the file.
+ - `clap` - command line arguments parser
+ - `assert_cmd` - for testing your CLI program like a user
+ - `predicates` - 
+ - `rand` 
 
 ### General programming
 
