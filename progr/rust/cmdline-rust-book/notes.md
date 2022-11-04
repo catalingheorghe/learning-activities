@@ -108,6 +108,8 @@ Without an else, returns unit type.
 
 Iterator trait
  - enumerate() -> (num, Result<value>)
+ - take() - limits the iterator to some elements; works also on filehandles
+ - collect() -> Vector
 
 for i in somethingiterable
 

@@ -46,6 +46,8 @@ Roadmaps, learning plans
  - Command line rust
  - Programming Rust
    - supplemental content: https://github.com/ProgrammingRust
+ - "The book"
+   - https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html
 
 ### News and communities
 

@@ -4,7 +4,7 @@
 //    possible exc: standard library errors 
 // 4. Be non exhaustive (`#[non_exhaustive]` attribute)
 //    requires a wildcard in match expressions in our library's uses
-// 5. Implement Debug Dispay Error traits
+// 5. Implement Debug Display Error traits
 // 5b. use thiserror for a quicker implementation
 
 // 1. Create a DolphinError type representing the following three conditions:

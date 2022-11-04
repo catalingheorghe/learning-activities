@@ -24,7 +24,7 @@ Handles objects and inheritance by "traits", which represent behaviours that
 objects (structs) can implement. There is no official constructor, but defacto,
 the "new" name is used for such a method.
 
-Enums are also interesting, being a sort of union, capable of sorting different
+Enums are also interesting, being a sort of union, capable of storing different
 variants, but each variant can also have a value. And enums can have
 implementation methods as well.
 
